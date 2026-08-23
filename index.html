@@ -271,6 +271,128 @@
             pointer-events: none;
         }
         @media (max-width: 900px) { .side-decoration, .side-decoration-left { display: none; } }
+    
+        /* 可折叠曲目菜单 */
+        .panel-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+            cursor: pointer;
+        }
+        .panel-title {
+            font-size: 13px;
+            color: #d4b48c;
+            letter-spacing: 2px;
+        }
+        .toggle-btn {
+            background: none;
+            border: none;
+            color: #b8956a;
+            font-size: 14px;
+            cursor: pointer;
+            padding: 2px 6px;
+            transition: transform 0.3s;
+        }
+        .toggle-btn.collapsed {
+            transform: rotate(-90deg);
+        }
+        .song-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: 10px;
+            transition: max-height 0.3s ease, opacity 0.3s ease;
+            overflow: hidden;
+            max-height: 200px;
+        }
+        .song-selector.collapsed {
+            max-height: 0;
+            opacity: 0;
+            margin-bottom: 0;
+        }
+        .song-btn {
+            background: rgba(30, 24, 18, 0.6);
+            border: 1px solid rgba(180, 140, 100, 0.3);
+            color: #a08a7a;
+            padding: 5px 12px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 12px;
+            font-family: 'SimSun', '宋体', serif;
+            transition: all 0.2s;
+            letter-spacing: 1px;
+        }
+        .song-btn:hover {
+            background: rgba(180, 140, 100, 0.2);
+            color: #d4b48c;
+        }
+        .song-btn.active {
+            background: linear-gradient(135deg, rgba(180, 140, 100, 0.4), rgba(140, 100, 60, 0.3));
+            color: #f0e0c8;
+            border-color: rgba(212, 180, 140, 0.6);
+        }
+        .player-controls {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        /* 视角预设 */
+        .view-presets {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding-top: 8px;
+            border-top: 1px solid rgba(180, 140, 100, 0.15);
+        }
+        .preset-label {
+            font-size: 11px;
+            color: #8a7a6a;
+            letter-spacing: 1px;
+            margin-right: 4px;
+        }
+        .preset-btn {
+            background: rgba(30, 24, 18, 0.5);
+            border: 1px solid rgba(180, 140, 100, 0.25);
+            color: #a08a7a;
+            padding: 4px 10px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 11px;
+            font-family: 'SimSun', '宋体', serif;
+            transition: all 0.2s;
+        }
+        .preset-btn:hover {
+            background: rgba(180, 140, 100, 0.2);
+            color: #d4b48c;
+        }
+        .preset-btn.active {
+            background: rgba(180, 140, 100, 0.3);
+            color: #f0e0c8;
+        }
+        /* UI显隐 */
+        .ui-hidden {
+            opacity: 0 !important;
+            pointer-events: none !important;
+            transition: opacity 0.4s ease;
+        }
+
+    
+        /* 可拖动面板 */
+        .player-panel {
+            cursor: move;
+            position: fixed;
+            user-select: none;
+        }
+        .player-panel .panel-header {
+            cursor: move;
+        }
+        .player-panel.dragging {
+            opacity: 0.85;
+            z-index: 100;
+        }
+
     </style>
 </head>
 <body>
@@ -311,14 +433,29 @@
     </div>
 
     <div class="player-panel" id="playerPanel">
+        <div class="panel-header">
+            <span class="panel-title">🎵 曲目</span>
+            <button class="toggle-btn" id="toggleSongs">▾</button>
+        </div>
         <div class="song-selector" id="songSelector">
             <button class="song-btn active" data-song="0">小星星</button>
             <button class="song-btn" data-song="1">茉莉花</button>
             <button class="song-btn" data-song="2">欢乐颂</button>
+            <button class="song-btn" data-song="3">高山流水</button>
+            <button class="song-btn" data-song="4">梅花三弄</button>
+            <button class="song-btn" data-song="5">阳关三叠</button>
         </div>
-        <button class="play-btn" id="playBtn">▶</button>
-        <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
-        <span class="progress-text" id="progressText">0/14</span>
+        <div class="player-controls">
+            <button class="play-btn" id="playBtn">▶</button>
+            <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
+            <span class="progress-text" id="progressText">0/14</span>
+        </div>
+        <div class="view-presets">
+            <span class="preset-label">视角</span>
+            <button class="preset-btn" data-view="front">正面</button>
+            <button class="preset-btn" data-view="side">侧面</button>
+            <button class="preset-btn" data-view="close">特写</button>
+        </div>
     </div>
 
     <div class="controls-hint" id="controlsHint">✦ 自由拖拽 · 点击编钟 · 聆听宫廷雅乐 ✦</div>
@@ -374,14 +511,20 @@
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.045;
+        controls.dampingFactor = 0.075;
+        controls.rotateSpeed = 0.55;
+        controls.zoomSpeed = 0.75;
+        controls.panSpeed = 0.7;
+        controls.enablePan = true;
         controls.autoRotate = false;
-        controls.autoRotateSpeed = 0.35;
-        controls.minDistance = 4;
-        controls.maxDistance = 35;
-        controls.maxPolarAngle = Math.PI / 2.08;
+        controls.autoRotateSpeed = 0.5;
+        controls.minDistance = 1.2;
+        controls.maxDistance = 40;
+        controls.maxPolarAngle = Math.PI * 0.92;
+        controls.minPolarAngle = 0.05;
         controls.target.set(0, 2, 0);
         controls.update();
+            updateUIVisibility();
 
         // ═══════════════════════════════════════════════════
         //  灯光系统（宴会暖光 + 多盏灯源）
@@ -1760,7 +1903,613 @@
             });
         });
         scene.add(bellGroup);
-        scene.add(createRack());
+        scene.add(createRack())
+        // ─── 古风坐着人物 ───
+        function createSeatedFigure(options = {}) {
+            const { 
+                robeColor = 0x2a1a1a, 
+                innerColor = 0x8a6a4a,
+                skinColor = 0xe8c8a8,
+                hairColor = 0x1a1410,
+                scale = 1.0,
+                rotation = 0
+            } = options;
+            
+            const group = new THREE.Group();
+            
+            // 材质
+            const skinMat = new THREE.MeshStandardMaterial({ 
+                color: skinColor, 
+                roughness: 0.6, 
+                metalness: 0.0,
+                emissive: new THREE.Color(skinColor).multiplyScalar(0.05)
+            });
+            const hairMat = new THREE.MeshStandardMaterial({ 
+                color: hairColor, 
+                roughness: 0.4, 
+                metalness: 0.1 
+            });
+            const robeMat = new THREE.MeshStandardMaterial({ 
+                color: robeColor, 
+                roughness: 0.75, 
+                metalness: 0.05 
+            });
+            const innerMat = new THREE.MeshStandardMaterial({ 
+                color: innerColor, 
+                roughness: 0.8, 
+                metalness: 0.0 
+            });
+            const beltMat = new THREE.MeshStandardMaterial({ 
+                color: 0x6a4a2a, 
+                roughness: 0.5, 
+                metalness: 0.2 
+            });
+            const trimMat = new THREE.MeshStandardMaterial({ 
+                color: 0xb8956a, 
+                roughness: 0.4, 
+                metalness: 0.3 
+            });
+            
+            // === 头部 ===
+            // 使用LatheGeometry创建精致脸型
+            const facePoints = [];
+            for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                const y = -0.22 + t * 0.44;
+                let r;
+                if (t < 0.15) r = 0.10 + t * 0.5;
+                else if (t < 0.5) r = 0.175 - (t - 0.15) * 0.1;
+                else if (t < 0.75) r = 0.14 - (t - 0.5) * 0.15;
+                else r = 0.10 - (t - 0.75) * 0.3;
+                facePoints.push(new THREE.Vector2(Math.max(0.02, r), y));
+            }
+            const faceGeo = new THREE.LatheGeometry(facePoints, 24);
+            const face = new THREE.Mesh(faceGeo, skinMat);
+            face.position.y = 0.85;
+            face.castShadow = true;
+            group.add(face);
+            
+            // 耳朵
+            const earGeo = new THREE.SphereGeometry(0.035, 8, 8);
+            const leftEar = new THREE.Mesh(earGeo, skinMat);
+            leftEar.position.set(-0.16, 0.85, 0);
+            leftEar.scale.set(0.6, 1.2, 0.4);
+            group.add(leftEar);
+            const rightEar = leftEar.clone();
+            rightEar.position.x = 0.16;
+            group.add(rightEar);
+            
+            // 眼睛（精致的细长眼）
+            const eyeMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.3 });
+            const eyeWhiteMat = new THREE.MeshStandardMaterial({ color: 0xf0e8d8, roughness: 0.5 });
+            const eyeGeo = new THREE.SphereGeometry(0.025, 8, 8);
+            const eyeWhiteGeo = new THREE.SphereGeometry(0.035, 8, 8);
+            
+            // 左眼
+            const leftEyeWhite = new THREE.Mesh(eyeWhiteGeo, eyeWhiteMat);
+            leftEyeWhite.position.set(-0.06, 0.88, 0.15);
+            leftEyeWhite.scale.set(1.5, 0.6, 0.3);
+            group.add(leftEyeWhite);
+            const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+            leftEye.position.set(-0.06, 0.88, 0.17);
+            leftEye.scale.set(1.2, 0.8, 0.5);
+            group.add(leftEye);
+            
+            // 右眼
+            const rightEyeWhite = leftEyeWhite.clone();
+            rightEyeWhite.position.x = 0.06;
+            group.add(rightEyeWhite);
+            const rightEye = leftEye.clone();
+            rightEye.position.x = 0.06;
+            group.add(rightEye);
+            
+            // 眉毛
+            const browMat = new THREE.MeshStandardMaterial({ color: 0x1a1410, roughness: 0.4 });
+            const browGeo = new THREE.BoxGeometry(0.06, 0.008, 0.01);
+            const leftBrow = new THREE.Mesh(browGeo, browMat);
+            leftBrow.position.set(-0.06, 0.92, 0.15);
+            leftBrow.rotation.z = 0.1;
+            group.add(leftBrow);
+            const rightBrow = leftBrow.clone();
+            rightBrow.position.x = 0.06;
+            rightBrow.rotation.z = -0.1;
+            group.add(rightBrow);
+            
+            // 鼻子
+            const noseGeo = new THREE.ConeGeometry(0.02, 0.06, 8);
+            const nose = new THREE.Mesh(noseGeo, skinMat);
+            nose.position.set(0, 0.83, 0.17);
+            nose.rotation.x = Math.PI;
+            group.add(nose);
+            
+            // 嘴巴
+            const mouthMat = new THREE.MeshStandardMaterial({ color: 0x8a4a3a, roughness: 0.6 });
+            const mouthGeo = new THREE.BoxGeometry(0.05, 0.008, 0.01);
+            const mouth = new THREE.Mesh(mouthGeo, mouthMat);
+            mouth.position.set(0, 0.76, 0.16);
+            group.add(mouth);
+            
+            // === 头发（黑色束发）===
+            // 头顶发髻
+            const bunGeo = new THREE.SphereGeometry(0.09, 12, 12);
+            const bun = new THREE.Mesh(bunGeo, hairMat);
+            bun.position.set(0, 1.08, -0.02);
+            bun.scale.set(1, 1.2, 0.9);
+            bun.castShadow = true;
+            group.add(bun);
+            
+            // 发冠
+            const crownGeo = new THREE.CylinderGeometry(0.06, 0.08, 0.04, 12);
+            const crownMat = new THREE.MeshStandardMaterial({ color: 0x3a2a1a, roughness: 0.4, metalness: 0.3 });
+            const crown = new THREE.Mesh(crownGeo, crownMat);
+            crown.position.set(0, 1.02, -0.02);
+            group.add(crown);
+            
+            // 后脑勺头发
+            const backHairGeo = new THREE.SphereGeometry(0.18, 16, 16, 0, Math.PI * 2, 0, Math.PI * 0.6);
+            const backHair = new THREE.Mesh(backHairGeo, hairMat);
+            backHair.position.set(0, 0.92, -0.05);
+            backHair.scale.set(1, 1.1, 0.8);
+            group.add(backHair);
+            
+            // 两侧鬓发
+            const sideHairGeo = new THREE.SphereGeometry(0.06, 8, 8);
+            const leftSideHair = new THREE.Mesh(sideHairGeo, hairMat);
+            leftSideHair.position.set(-0.15, 0.82, 0.05);
+            leftSideHair.scale.set(0.6, 1.5, 0.5);
+            group.add(leftSideHair);
+            const rightSideHair = leftSideHair.clone();
+            rightSideHair.position.x = 0.15;
+            group.add(rightSideHair);
+            
+            // === 身体（坐姿）===
+            // 躯干（多层衣服）
+            const torsoGeo = new THREE.CylinderGeometry(0.22, 0.28, 0.45, 16);
+            const torso = new THREE.Mesh(torsoGeo, robeMat);
+            torso.position.y = 0.45;
+            torso.castShadow = true;
+            group.add(torso);
+            
+            // 中衣领口
+            const collarGeo = new THREE.CylinderGeometry(0.18, 0.20, 0.08, 16);
+            const collar = new THREE.Mesh(collarGeo, innerMat);
+            collar.position.y = 0.68;
+            group.add(collar);
+            
+            // 交领右衽（衣襟）
+            const lapelGeo = new THREE.BoxGeometry(0.25, 0.35, 0.02);
+            const leftLapel = new THREE.Mesh(lapelGeo, innerMat);
+            leftLapel.position.set(-0.06, 0.50, 0.20);
+            leftLapel.rotation.z = 0.3;
+            leftLapel.rotation.y = -0.2;
+            group.add(leftLapel);
+            
+            // 腰带
+            const beltGeo = new THREE.CylinderGeometry(0.24, 0.25, 0.05, 16);
+            const belt = new THREE.Mesh(beltGeo, beltMat);
+            belt.position.y = 0.30;
+            group.add(belt);
+            
+            // 腰带装饰
+            const beltDecoGeo = new THREE.BoxGeometry(0.06, 0.06, 0.02);
+            const beltDeco = new THREE.Mesh(beltDecoGeo, trimMat);
+            beltDeco.position.set(0, 0.30, 0.24);
+            group.add(beltDeco);
+            
+            // 衣缘（袖口和下摆）
+            const sleeveTrimGeo = new THREE.TorusGeometry(0.08, 0.015, 8, 16);
+            const hemGeo = new THREE.TorusGeometry(0.27, 0.02, 8, 24);
+            const hem = new THREE.Mesh(hemGeo, trimMat);
+            hem.position.y = 0.22;
+            hem.rotation.x = Math.PI / 2;
+            group.add(hem);
+            
+            // === 手臂（正常2只手，放在膝盖上）===
+            // 左上臂
+            const upperArmGeo = new THREE.CylinderGeometry(0.05, 0.06, 0.25, 8);
+            const leftUpperArm = new THREE.Mesh(upperArmGeo, robeMat);
+            leftUpperArm.position.set(-0.22, 0.45, 0.05);
+            leftUpperArm.rotation.z = 0.5;
+            leftUpperArm.rotation.x = -0.3;
+            leftUpperArm.castShadow = true;
+            group.add(leftUpperArm);
+            
+            // 左前臂
+            const forearmGeo = new THREE.CylinderGeometry(0.045, 0.05, 0.22, 8);
+            const leftForearm = new THREE.Mesh(forearmGeo, robeMat);
+            leftForearm.position.set(-0.30, 0.28, 0.12);
+            leftForearm.rotation.z = 1.2;
+            leftForearm.rotation.x = -0.2;
+            group.add(leftForearm);
+            
+            // 左手
+            const handGeo = new THREE.SphereGeometry(0.04, 8, 8);
+            const leftHand = new THREE.Mesh(handGeo, skinMat);
+            leftHand.position.set(-0.35, 0.18, 0.15);
+            leftHand.scale.set(0.8, 1.0, 0.5);
+            group.add(leftHand);
+            
+            // 左袖口
+            const leftCuff = new THREE.Mesh(sleeveTrimGeo, trimMat);
+            leftCuff.position.set(-0.32, 0.22, 0.13);
+            leftCuff.rotation.z = 1.2;
+            group.add(leftCuff);
+            
+            // 右上臂
+            const rightUpperArm = leftUpperArm.clone();
+            rightUpperArm.position.x = 0.22;
+            rightUpperArm.rotation.z = -0.5;
+            group.add(rightUpperArm);
+            
+            // 右前臂
+            const rightForearm = leftForearm.clone();
+            rightForearm.position.x = 0.30;
+            rightForearm.rotation.z = -1.2;
+            group.add(rightForearm);
+            
+            // 右手
+            const rightHand = leftHand.clone();
+            rightHand.position.x = 0.35;
+            group.add(rightHand);
+            
+            // 右袖口
+            const rightCuff = leftCuff.clone();
+            rightCuff.position.x = 0.32;
+            rightCuff.rotation.z = -1.2;
+            group.add(rightCuff);
+            
+            // === 腿部（坐姿，弯曲）===
+            // 大腿
+            const thighGeo = new THREE.CylinderGeometry(0.09, 0.10, 0.35, 8);
+            const leftThigh = new THREE.Mesh(thighGeo, robeMat);
+            leftThigh.position.set(-0.12, 0.05, 0.15);
+            leftThigh.rotation.x = Math.PI / 2.5;
+            leftThigh.castShadow = true;
+            group.add(leftThigh);
+            
+            const rightThigh = leftThigh.clone();
+            rightThigh.position.x = 0.12;
+            group.add(rightThigh);
+            
+            // 小腿
+            const calfGeo = new THREE.CylinderGeometry(0.07, 0.08, 0.30, 8);
+            const leftCalf = new THREE.Mesh(calfGeo, robeMat);
+            leftCalf.position.set(-0.12, -0.10, 0.35);
+            leftCalf.rotation.x = Math.PI / 8;
+            group.add(leftCalf);
+            
+            const rightCalf = leftCalf.clone();
+            rightCalf.position.x = 0.12;
+            group.add(rightCalf);
+            
+            // 脚
+            const footGeo = new THREE.BoxGeometry(0.10, 0.04, 0.15);
+            const footMat = new THREE.MeshStandardMaterial({ color: 0x2a1a10, roughness: 0.6 });
+            const leftFoot = new THREE.Mesh(footGeo, footMat);
+            leftFoot.position.set(-0.12, -0.22, 0.45);
+            group.add(leftFoot);
+            
+            const rightFoot = leftFoot.clone();
+            rightFoot.position.x = 0.12;
+            group.add(rightFoot);
+            
+            // 玉佩（腰部装饰）
+            const jadeGeo = new THREE.TorusGeometry(0.03, 0.008, 8, 16);
+            const jadeMat = new THREE.MeshStandardMaterial({ color: 0x8aaa8a, roughness: 0.3, metalness: 0.1, emissive: 0x2a4a2a, emissiveIntensity: 0.1 });
+            const jade = new THREE.Mesh(jadeGeo, jadeMat);
+            jade.position.set(0.15, 0.25, 0.25);
+            jade.rotation.x = Math.PI / 2;
+            group.add(jade);
+            
+            // 玉佩流苏
+            const tasselGeo = new THREE.CylinderGeometry(0.005, 0.01, 0.12, 4);
+            const tasselMat = new THREE.MeshStandardMaterial({ color: 0x8a4a3a, roughness: 0.8 });
+            const tassel = new THREE.Mesh(tasselGeo, tasselMat);
+            tassel.position.set(0.15, 0.17, 0.25);
+            group.add(tassel);
+            
+            group.scale.set(scale, scale, scale);
+            group.rotation.y = rotation;
+            return group;
+        }
+        
+        // 添加坐着的古风人物到场景
+        const figure1 = createSeatedFigure({ 
+            robeColor: 0x3a2a4a, 
+            innerColor: 0x9a7a5a,
+            scale: 0.9,
+            rotation: Math.PI * 0.15
+        });
+        figure1.position.set(-4.5, 0.15, 3.5);
+        scene.add(figure1);
+        
+        const figure2 = createSeatedFigure({ 
+            robeColor: 0x2a3a2a, 
+            innerColor: 0x8a6a4a,
+            scale: 0.85,
+            rotation: -Math.PI * 0.15
+        });
+        figure2.position.set(4.5, 0.15, 3.5);
+        scene.add(figure2);
+        
+        const figure3 = createSeatedFigure({ 
+            robeColor: 0x4a3a2a, 
+            innerColor: 0xaa8a6a,
+            scale: 0.8,
+            rotation: Math.PI * 0.1
+        });
+        figure3.position.set(-3.0, 0.15, 4.5);
+        scene.add(figure3);
+        
+        const figure4 = createSeatedFigure({ 
+            robeColor: 0x2a2a4a, 
+            innerColor: 0x9a7a6a,
+            scale: 0.8,
+            rotation: -Math.PI * 0.1
+        });
+        figure4.position.set(3.0, 0.15, 4.5);
+        scene.add(figure4);
+        // ─── 宫殿场景完善 ───
+        
+        // === 柱子 ===
+        function createPalacePillar(height = 5.5, radius = 0.25) {
+            const group = new THREE.Group();
+            
+            // 柱身（红色漆木柱）
+            const pillarMat = new THREE.MeshStandardMaterial({ 
+                color: 0x6a2a1a, 
+                roughness: 0.5, 
+                metalness: 0.1 
+            });
+            const pillarGeo = new THREE.CylinderGeometry(radius, radius * 1.1, height, 16);
+            const pillar = new THREE.Mesh(pillarGeo, pillarMat);
+            pillar.position.y = height / 2;
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            group.add(pillar);
+            
+            // 柱基（石质基座）
+            const baseMat = new THREE.MeshStandardMaterial({ 
+                color: 0x5a5048, 
+                roughness: 0.7, 
+                metalness: 0.1 
+            });
+            const baseGeo = new THREE.CylinderGeometry(radius * 1.6, radius * 1.8, 0.3, 16);
+            const base = new THREE.Mesh(baseGeo, baseMat);
+            base.position.y = 0.15;
+            base.castShadow = true;
+            base.receiveShadow = true;
+            group.add(base);
+            
+            // 柱础装饰
+            const baseDecoGeo = new THREE.TorusGeometry(radius * 1.4, 0.03, 8, 16);
+            const baseDeco = new THREE.Mesh(baseDecoGeo, baseMat);
+            baseDeco.position.y = 0.3;
+            baseDeco.rotation.x = Math.PI / 2;
+            group.add(baseDeco);
+            
+            // 柱头（斗拱）
+            const capitalMat = new THREE.MeshStandardMaterial({ 
+                color: 0x4a3a2a, 
+                roughness: 0.6, 
+                metalness: 0.1 
+            });
+            const capitalGeo = new THREE.BoxGeometry(radius * 2.5, 0.2, radius * 2.5);
+            const capital = new THREE.Mesh(capitalGeo, capitalMat);
+            capital.position.y = height + 0.1;
+            capital.castShadow = true;
+            group.add(capital);
+            
+            // 斗拱层
+            const bracketGeo = new THREE.BoxGeometry(radius * 3, 0.15, radius * 1.5);
+            const bracket1 = new THREE.Mesh(bracketGeo, capitalMat);
+            bracket1.position.y = height + 0.3;
+            bracket1.castShadow = true;
+            group.add(bracket1);
+            
+            const bracket2 = new THREE.Mesh(bracketGeo, capitalMat);
+            bracket2.position.y = height + 0.45;
+            bracket2.rotation.y = Math.PI / 2;
+            bracket2.castShadow = true;
+            group.add(bracket2);
+            
+            return group;
+        }
+        
+        // 添加柱子（两侧各3根）
+        const pillarPositions = [
+            [-6.5, 0, -3], [-6.5, 0, 0], [-6.5, 0, 3],
+            [6.5, 0, -3], [6.5, 0, 0], [6.5, 0, 3],
+        ];
+        pillarPositions.forEach(([x, y, z]) => {
+            const pillar = createPalacePillar();
+            pillar.position.set(x, y, z);
+            scene.add(pillar);
+        });
+        
+        // === 精致地板 ===
+        // 地板纹理（金砖效果）
+        function createFloorTexture() {
+            const canvas = document.createElement('canvas');
+            canvas.width = 512;
+            canvas.height = 512;
+            const ctx = canvas.getContext('2d');
+            
+            // 底色
+            ctx.fillStyle = '#3a3028';
+            ctx.fillRect(0, 0, 512, 512);
+            
+            // 金砖格子
+            const tileSize = 64;
+            for (let y = 0; y < 512; y += tileSize) {
+                for (let x = 0; x < 512; x += tileSize) {
+                    // 每块砖的颜色略有不同
+                    const brightness = 0.85 + Math.random() * 0.3;
+                    const r = Math.floor(58 * brightness);
+                    const g = Math.floor(48 * brightness);
+                    const b = Math.floor(40 * brightness);
+                    ctx.fillStyle = `rgb(${r},${g},${b})`;
+                    ctx.fillRect(x + 1, y + 1, tileSize - 2, tileSize - 2);
+                    
+                    // 砖面纹理
+                    ctx.strokeStyle = `rgba(80,60,40,${0.1 + Math.random() * 0.1})`;
+                    ctx.lineWidth = 1;
+                    for (let i = 0; i < 3; i++) {
+                        ctx.beginPath();
+                        ctx.moveTo(x + Math.random() * tileSize, y);
+                        ctx.lineTo(x + Math.random() * tileSize, y + tileSize);
+                        ctx.stroke();
+                    }
+                }
+            }
+            
+            // 砖缝
+            ctx.strokeStyle = 'rgba(20,15,10,0.5)';
+            ctx.lineWidth = 2;
+            for (let i = 0; i <= 512; i += tileSize) {
+                ctx.beginPath();
+                ctx.moveTo(i, 0);
+                ctx.lineTo(i, 512);
+                ctx.stroke();
+                ctx.beginPath();
+                ctx.moveTo(0, i);
+                ctx.lineTo(512, i);
+                ctx.stroke();
+            }
+            
+            return new THREE.CanvasTexture(canvas);
+        }
+        
+        const floorTexture = createFloorTexture();
+        floorTexture.wrapS = THREE.RepeatWrapping;
+        floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set(4, 4);
+        
+        // 替换原有的地板
+        const palaceFloorGeo = new THREE.PlaneGeometry(20, 20);
+        const palaceFloorMat = new THREE.MeshStandardMaterial({ 
+            map: floorTexture,
+            roughness: 0.6, 
+            metalness: 0.1 
+        });
+        const palaceFloor = new THREE.Mesh(palaceFloorGeo, palaceFloorMat);
+        palaceFloor.rotation.x = -Math.PI / 2;
+        palaceFloor.position.y = -0.01;
+        palaceFloor.receiveShadow = true;
+        scene.add(palaceFloor);
+        
+        // === 天花板横梁 ===
+        const beamMat = new THREE.MeshStandardMaterial({ 
+            color: 0x4a3020, 
+            roughness: 0.6, 
+            metalness: 0.1 
+        });
+        const beamGoldMat = new THREE.MeshStandardMaterial({ 
+            color: 0xb8956a, 
+            roughness: 0.4, 
+            metalness: 0.4 
+        });
+        
+        // 主横梁（横向）
+        for (let z = -4; z <= 4; z += 2) {
+            const beamGeo = new THREE.BoxGeometry(16, 0.3, 0.4);
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.set(0, 5.8, z);
+            beam.castShadow = true;
+            scene.add(beam);
+            
+            // 横梁金色装饰线
+            const decoGeo = new THREE.BoxGeometry(16, 0.05, 0.42);
+            const deco = new THREE.Mesh(decoGeo, beamGoldMat);
+            deco.position.set(0, 5.95, z);
+            scene.add(deco);
+        }
+        
+        // 次横梁（纵向）
+        for (let x = -6; x <= 6; x += 3) {
+            const beamGeo = new THREE.BoxGeometry(0.3, 0.25, 10);
+            const beam = new THREE.Mesh(beamGeo, beamMat);
+            beam.position.set(x, 5.65, 0);
+            beam.castShadow = true;
+            scene.add(beam);
+        }
+        
+        // === 藻井（天花板中心装饰）===
+        const caissonGroup = new THREE.Group();
+        
+        // 外圈
+        const caissonOuterGeo = new THREE.TorusGeometry(1.5, 0.15, 8, 32);
+        const caissonOuter = new THREE.Mesh(caissonOuterGeo, beamGoldMat);
+        caissonOuter.rotation.x = Math.PI / 2;
+        caissonGroup.add(caissonOuter);
+        
+        // 内圈
+        const caissonInnerGeo = new THREE.TorusGeometry(1.0, 0.1, 8, 32);
+        const caissonInner = new THREE.Mesh(caissonInnerGeo, beamMat);
+        caissonInner.rotation.x = Math.PI / 2;
+        caissonGroup.add(caissonInner);
+        
+        // 中心装饰
+        const caissonCenterGeo = new THREE.CylinderGeometry(0.6, 0.6, 0.1, 32);
+        const caissonCenter = new THREE.Mesh(caissonCenterGeo, beamGoldMat);
+        caissonGroup.add(caissonCenter);
+        
+        // 中心莲花纹（简化）
+        for (let i = 0; i < 8; i++) {
+            const petalGeo = new THREE.SphereGeometry(0.15, 8, 8);
+            const petal = new THREE.Mesh(petalGeo, beamMat);
+            const angle = (i / 8) * Math.PI * 2;
+            petal.position.set(Math.cos(angle) * 0.4, 0.08, Math.sin(angle) * 0.4);
+            petal.scale.set(1, 0.3, 0.6);
+            petal.rotation.y = -angle;
+            caissonGroup.add(petal);
+        }
+        
+        caissonGroup.position.set(0, 5.5, 0);
+        scene.add(caissonGroup);
+        
+        // === 台阶（编钟台基）===
+        const platformMat = new THREE.MeshStandardMaterial({ 
+            color: 0x4a4038, 
+            roughness: 0.7, 
+            metalness: 0.1 
+        });
+        
+        // 第一层台阶
+        const step1Geo = new THREE.BoxGeometry(10, 0.2, 6);
+        const step1 = new THREE.Mesh(step1Geo, platformMat);
+        step1.position.set(0, 0.1, 0);
+        step1.receiveShadow = true;
+        step1.castShadow = true;
+        scene.add(step1);
+        
+        // 第二层台阶
+        const step2Geo = new THREE.BoxGeometry(9, 0.2, 5);
+        const step2 = new THREE.Mesh(step2Geo, platformMat);
+        step2.position.set(0, 0.3, 0);
+        step2.receiveShadow = true;
+        step2.castShadow = true;
+        scene.add(step2);
+        
+        // 台阶金色边缘
+        const stepEdgeMat = new THREE.MeshStandardMaterial({ 
+            color: 0xb8956a, 
+            roughness: 0.4, 
+            metalness: 0.4 
+        });
+        const stepEdge1Geo = new THREE.BoxGeometry(10.1, 0.05, 6.1);
+        const stepEdge1 = new THREE.Mesh(stepEdge1Geo, stepEdgeMat);
+        stepEdge1.position.set(0, 0.22, 0);
+        scene.add(stepEdge1);
+        
+        const stepEdge2Geo = new THREE.BoxGeometry(9.1, 0.05, 5.1);
+        const stepEdge2 = new THREE.Mesh(stepEdge2Geo, stepEdgeMat);
+        stepEdge2.position.set(0, 0.42, 0);
+        scene.add(stepEdge2);
+        
+
+        
+;
 
         bellMeshes.forEach((bell) => {
             const data = bell.userData.bellData;
@@ -2010,6 +2759,41 @@
                 {f:N.C5,d:0.4},{f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.4},
                 {f:N.D5,d:0.6},{f:N.C5,d:0.2},{f:N.C5,d:0.8},
             ]},
+            { name:'高山流水', notes:[
+                {f:N.G4,d:0.5},{f:N.A4,d:0.3},{f:N.C5,d:0.5},{f:N.D5,d:0.3},
+                {f:N.E5,d:0.6},{f:N.D5,d:0.3},{f:N.C5,d:0.4},{f:N.REST,d:0.2},
+                {f:N.A4,d:0.5},{f:N.G4,d:0.3},{f:N.E4,d:0.5},{f:N.G4,d:0.3},
+                {f:N.A4,d:0.6},{f:N.C5,d:0.4},{f:N.REST,d:0.2},
+                {f:N.E5,d:0.4},{f:N.D5,d:0.3},{f:N.C5,d:0.3},{f:N.A4,d:0.4},
+                {f:N.G4,d:0.5},{f:N.A4,d:0.3},{f:N.C5,d:0.6},{f:N.REST,d:0.2},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.3},{f:N.G5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.D5,d:0.3},{f:N.C5,d:0.5},{f:N.A4,d:0.4},{f:N.G4,d:0.6},
+            ]},
+            { name:'梅花三弄', notes:[
+                {f:N.E5,d:0.4},{f:N.G5,d:0.3},{f:N.A5,d:0.3},{f:N.G5,d:0.4},
+                {f:N.E5,d:0.3},{f:N.D5,d:0.3},{f:N.C5,d:0.6},{f:N.REST,d:0.2},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.3},{f:N.G5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.D5,d:0.3},{f:N.C5,d:0.3},{f:N.A4,d:0.6},{f:N.REST,d:0.2},
+                {f:N.G4,d:0.4},{f:N.A4,d:0.3},{f:N.C5,d:0.3},{f:N.A4,d:0.4},
+                {f:N.G4,d:0.3},{f:N.E4,d:0.3},{f:N.G4,d:0.6},{f:N.REST,d:0.2},
+                {f:N.E5,d:0.4},{f:N.G5,d:0.3},{f:N.A5,d:0.3},{f:N.C6,d:0.4},
+                {f:N.A5,d:0.3},{f:N.G5,d:0.3},{f:N.E5,d:0.6},{f:N.REST,d:0.2},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.3},{f:N.G5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.D5,d:0.3},{f:N.C5,d:0.5},{f:N.A4,d:0.4},{f:N.G4,d:0.6},
+            ]},
+            { name:'阳关三叠', notes:[
+                {f:N.A4,d:0.4},{f:N.C5,d:0.3},{f:N.D5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.D5,d:0.3},{f:N.C5,d:0.3},{f:N.A4,d:0.6},{f:N.REST,d:0.2},
+                {f:N.G4,d:0.4},{f:N.A4,d:0.3},{f:N.C5,d:0.3},{f:N.D5,d:0.4},
+                {f:N.E5,d:0.3},{f:N.D5,d:0.3},{f:N.C5,d:0.6},{f:N.REST,d:0.2},
+                {f:N.E5,d:0.4},{f:N.G5,d:0.3},{f:N.A5,d:0.3},{f:N.G5,d:0.4},
+                {f:N.E5,d:0.3},{f:N.D5,d:0.3},{f:N.C5,d:0.6},{f:N.REST,d:0.2},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.3},{f:N.G5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.D5,d:0.3},{f:N.C5,d:0.3},{f:N.A4,d:0.6},{f:N.REST,d:0.2},
+                {f:N.A4,d:0.4},{f:N.C5,d:0.3},{f:N.D5,d:0.3},{f:N.E5,d:0.4},
+                {f:N.G5,d:0.3},{f:N.E5,d:0.3},{f:N.D5,d:0.5},{f:N.C5,d:0.4},
+                {f:N.A4,d:0.6},{f:N.REST,d:0.4},
+            ]},
         ];
         let currentSongIndex = 0, isPlaying = false, currentNoteIndex = 0, timeoutId = null, activeHighlightBell = null;
         function findClosestBell(freq) {
@@ -2109,6 +2893,172 @@
         //  动画循环
         // ═══════════════════════════════════════════════════
         const clock = new THREE.Clock();
+        
+        // ─── 视角预设 ───
+        const viewPresets = {
+            front: { pos: [0, 3, 15], target: [0, 2, 0] },
+            side: { pos: [15, 3, 0], target: [0, 2, 0] },
+            close: { pos: [0, 2, 6], target: [0, 1.5, 0] },
+        };
+        let currentView = null;
+        let viewAnimating = false;
+
+        function switchView(viewName) {
+            const preset = viewPresets[viewName];
+            if (!preset) return;
+            currentView = viewName;
+            viewAnimating = true;
+            const startPos = camera.position.clone();
+            const startTarget = controls.target.clone();
+            const endPos = new THREE.Vector3(...preset.pos);
+            const endTarget = new THREE.Vector3(...preset.target);
+            const duration = 800;
+            const startTime = performance.now();
+            function animateView() {
+                const elapsed = performance.now() - startTime;
+                const t = Math.min(elapsed / duration, 1);
+                const ease = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+                camera.position.lerpVectors(startPos, endPos, ease);
+                controls.target.lerpVectors(startTarget, endTarget, ease);
+                controls.update();
+                if (t < 1) {
+                    requestAnimationFrame(animateView);
+                } else {
+                    viewAnimating = false;
+                }
+            }
+            animateView();
+            // 更新按钮状态
+            document.querySelectorAll('.preset-btn').forEach(btn => {
+                btn.classList.toggle('active', btn.dataset.view === viewName);
+            });
+        }
+
+        // 绑定视角预设按钮
+        document.querySelectorAll('.preset-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchView(btn.dataset.view));
+        });
+
+        // ─── 曲目折叠菜单 ───
+        const toggleSongsBtn = document.getElementById('toggleSongs');
+        if (toggleSongsBtn && songSelector) {
+            toggleSongsBtn.addEventListener('click', () => {
+                songSelector.classList.toggle('collapsed');
+                toggleSongsBtn.classList.toggle('collapsed');
+            });
+        }
+
+        
+        // ─── 可拖动面板 ───
+        function makeDraggable(element) {
+            if (!element) return;
+            let isDragging = false;
+            let startX, startY, initialLeft, initialTop;
+            
+            // 确保元素使用fixed定位
+            const computedStyle = window.getComputedStyle(element);
+            if (computedStyle.position !== 'fixed') {
+                element.style.position = 'fixed';
+            }
+            // 设置初始位置
+            const rect = element.getBoundingClientRect();
+            element.style.left = rect.left + 'px';
+            element.style.top = rect.top + 'px';
+            element.style.right = 'auto';
+            element.style.bottom = 'auto';
+            element.style.transform = 'none';
+            
+            element.addEventListener('mousedown', (e) => {
+                // 不拖动按钮和输入框
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+                isDragging = true;
+                startX = e.clientX;
+                startY = e.clientY;
+                const rect = element.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+                element.classList.add('dragging');
+                e.preventDefault();
+            });
+            
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                const dx = e.clientX - startX;
+                const dy = e.clientY - startY;
+                element.style.left = (initialLeft + dx) + 'px';
+                element.style.top = (initialTop + dy) + 'px';
+            });
+            
+            document.addEventListener('mouseup', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                }
+            });
+            
+            // 触摸支持
+            element.addEventListener('touchstart', (e) => {
+                if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+                isDragging = true;
+                const touch = e.touches[0];
+                startX = touch.clientX;
+                startY = touch.clientY;
+                const rect = element.getBoundingClientRect();
+                initialLeft = rect.left;
+                initialTop = rect.top;
+                element.classList.add('dragging');
+            });
+            
+            document.addEventListener('touchmove', (e) => {
+                if (!isDragging) return;
+                const touch = e.touches[0];
+                const dx = touch.clientX - startX;
+                const dy = touch.clientY - startY;
+                element.style.left = (initialLeft + dx) + 'px';
+                element.style.top = (initialTop + dy) + 'px';
+                e.preventDefault();
+            }, { passive: false });
+            
+            document.addEventListener('touchend', () => {
+                if (isDragging) {
+                    isDragging = false;
+                    element.classList.remove('dragging');
+                }
+            });
+        }
+        
+        // 使player-panel可拖动
+        makeDraggable(document.getElementById('playerPanel'));
+
+        // ─── UI显隐控制（放大时隐藏） ───
+        function updateUIVisibility() {
+            const distance = camera.position.distanceTo(controls.target);
+            const uiElements = [
+                document.getElementById('playerPanel'),
+                document.getElementById('infoPanel'),
+                document.getElementById('introPanel'),
+                document.querySelector('.header'),
+                document.querySelector('.controls-hint'),
+            ];
+            if (distance < 5.0) {
+                uiElements.forEach(el => el && el.classList.add('ui-hidden'));
+            } else if (distance > 6.5) {
+                uiElements.forEach(el => el && el.classList.remove('ui-hidden'));
+            }
+            // 编钟标签显隐
+            bellMeshes.forEach(bell => {
+                const label = bell.children.find(child => child.isCSS2DObject);
+                if (label) {
+                    if (distance < 7.0) {
+                        label.element.style.display = 'block';
+                    } else if (distance > 9.0) {
+                        label.element.style.display = 'none';
+                    }
+                }
+            });
+        }
+
+
         function animate() {
             requestAnimationFrame(animate);
             const delta = clock.getDelta(), elapsed = clock.getElapsedTime();
