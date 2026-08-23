@@ -307,7 +307,7 @@
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
         <div class="pitch" id="bellPitch">🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介</div>
-        <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1/2/3</span> 切换曲目</div>
+        <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1-6</span> 切换曲目</div>
     </div>
 
     <div class="player-panel" id="playerPanel">
@@ -315,6 +315,9 @@
             <button class="song-btn active" data-song="0">小星星</button>
             <button class="song-btn" data-song="1">茉莉花</button>
             <button class="song-btn" data-song="2">欢乐颂</button>
+            <button class="song-btn" data-song="3">高山流水</button>
+            <button class="song-btn" data-song="4">梅花三弄</button>
+            <button class="song-btn" data-song="5">阳关三叠</button>
         </div>
         <button class="play-btn" id="playBtn">▶</button>
         <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
@@ -2010,6 +2013,34 @@
                 {f:N.C5,d:0.4},{f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.4},
                 {f:N.D5,d:0.6},{f:N.C5,d:0.2},{f:N.C5,d:0.8},
             ]},
+            { name:'高山流水', notes:[
+                {f:N.G4,d:0.5},{f:N.A4,d:0.5},{f:N.C5,d:0.6},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.4},{f:N.G5,d:0.8},
+                {f:N.E5,d:0.4},{f:N.D5,d:0.4},{f:N.C5,d:0.6},
+                {f:N.A4,d:0.4},{f:N.G4,d:0.8},{f:N.REST,d:0.2},
+                {f:N.G4,d:0.5},{f:N.A4,d:0.5},{f:N.C5,d:0.6},
+                {f:N.D5,d:0.4},{f:N.E5,d:0.4},{f:N.G5,d:0.8},
+                {f:N.A5,d:0.6},{f:N.G5,d:0.4},{f:N.E5,d:0.6},
+                {f:N.D5,d:0.4},{f:N.C5,d:0.8},
+            ]},
+            { name:'梅花三弄', notes:[
+                {f:N.E5,d:0.4},{f:N.G5,d:0.4},{f:N.A5,d:0.6},
+                {f:N.G5,d:0.4},{f:N.E5,d:0.4},{f:N.D5,d:0.6},
+                {f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.8},
+                {f:N.REST,d:0.2},{f:N.E5,d:0.4},{f:N.G5,d:0.4},
+                {f:N.A5,d:0.6},{f:N.C6,d:0.4},{f:N.A5,d:0.4},
+                {f:N.G5,d:0.6},{f:N.E5,d:0.4},{f:N.D5,d:0.4},
+                {f:N.C5,d:0.8},
+            ]},
+            { name:'阳关三叠', notes:[
+                {f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.6},
+                {f:N.G5,d:0.4},{f:N.E5,d:0.4},{f:N.D5,d:0.6},
+                {f:N.C5,d:0.4},{f:N.A4,d:0.4},{f:N.G4,d:0.8},
+                {f:N.REST,d:0.2},{f:N.G4,d:0.4},{f:N.A4,d:0.4},
+                {f:N.C5,d:0.6},{f:N.D5,d:0.4},{f:N.E5,d:0.4},
+                {f:N.G5,d:0.6},{f:N.E5,d:0.4},{f:N.D5,d:0.4},
+                {f:N.C5,d:0.8},
+            ]},
         ];
         let currentSongIndex = 0, isPlaying = false, currentNoteIndex = 0, timeoutId = null, activeHighlightBell = null;
         function findClosestBell(freq) {
@@ -2099,7 +2130,7 @@
                     if (selectedBell && !isPlaying) infoPitch.textContent = `音高：${selectedBell.userData.freq.toFixed(1)} Hz`;
                     else if (!isPlaying) infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介';
                 }, 1800);
-            } else if (e.key >= '1' && e.key <= '3') {
+            } else if (e.key >= '1' && e.key <= '6') {
                 const idx = parseInt(e.key) - 1;
                 if (idx < songs.length) { const btn = document.querySelector(`.song-btn[data-song="${idx}"]`); if (btn) btn.click(); }
             }
