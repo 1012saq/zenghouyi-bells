@@ -2435,45 +2435,6 @@
         document.addEventListener('touchstart', initAudio, { once: true });
         animate();
         
-        // UI面板可拖动和缩略（在3D场景初始化后执行）
-        function makeDraggable(panel) {
-            let isDragging = false, startX, startY, initLeft, initTop;
-            const handle = panel.querySelector('.minimize-btn') || panel;
-            handle.addEventListener('mousedown', (e) => {
-                if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('minimize-btn')) return;
-                if (e.target.classList.contains('song-btn')) return;
-                isDragging = true;
-                startX = e.clientX; startY = e.clientY;
-                const rect = panel.getBoundingClientRect();
-                initLeft = rect.left; initTop = rect.top;
-                panel.style.position = 'fixed';
-                panel.style.left = initLeft + 'px';
-                panel.style.top = initTop + 'px';
-                panel.style.right = 'auto';
-                panel.style.bottom = 'auto';
-                panel.style.transform = 'none';
-                panel.style.zIndex = '1000';
-                e.preventDefault();
-            });
-            document.addEventListener('mousemove', (e) => {
-                if (!isDragging) return;
-                panel.style.left = (initLeft + e.clientX - startX) + 'px';
-                panel.style.top = (initTop + e.clientY - startY) + 'px';
-            });
-            document.addEventListener('mouseup', () => { isDragging = false; });
-        }
-        document.querySelectorAll('.draggable-panel').forEach(panel => {
-            makeDraggable(panel);
-            const minBtn = panel.querySelector('.minimize-btn');
-            if (minBtn) {
-                minBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    panel.classList.toggle('panel-minimized');
-                    minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
-                });
-            }
-        });
-        
         setTimeout(() => { controlsHint.style.opacity = '0'; }, 12000);
         setTimeout(() => { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介'; }, 1700);
         console.log('🎵 曾侯乙编钟 · 宫廷雅乐 · 宴会版 v3');
