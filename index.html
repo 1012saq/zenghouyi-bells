@@ -505,7 +505,7 @@
         // 地面（宫殿深色大理石，偏红棕色）
         const groundGeo = new THREE.CircleGeometry(24, 72);
         const groundMat = new THREE.MeshStandardMaterial({
-            color: 0x3a1a10, roughness: 0.7, metalness: 0.1,
+            color: 0x5a2010, roughness: 0.8, metalness: 0.05,
         });
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
@@ -2373,32 +2373,46 @@
                 panel.style.zIndex = '';
             });
             
+            // 强制设置header的位置，确保它在画面中间的上方
+            const headerPanel = document.getElementById('headerPanel');
+            if (headerPanel) {
+                headerPanel.style.position = 'fixed';
+                headerPanel.style.top = '20px';
+                headerPanel.style.left = '50%';
+                headerPanel.style.transform = 'translateX(-50%)';
+                headerPanel.style.bottom = 'auto';
+                headerPanel.style.zIndex = '150';
+            }
+            
             // 强制设置介绍面板的位置，确保它在视口内可见
             const introPanel = document.getElementById('introPanel');
             if (introPanel) {
                 introPanel.style.position = 'fixed';
                 introPanel.style.left = '38px';
                 introPanel.style.top = '80px';
+                introPanel.style.bottom = 'auto';
                 introPanel.style.transform = 'none';
                 introPanel.style.zIndex = '100';
             }
             
-            // 强制设置信息面板的位置，确保它在视口内可见
+            // 强制设置信息面板的位置，确保它在屏幕底部
             const infoPanel = document.getElementById('infoPanel');
             if (infoPanel) {
                 infoPanel.style.position = 'fixed';
                 infoPanel.style.left = '50%';
-                infoPanel.style.bottom = '30px';
+                infoPanel.style.bottom = '20px';
+                infoPanel.style.top = 'auto';
                 infoPanel.style.transform = 'translateX(-50%)';
                 infoPanel.style.zIndex = '100';
             }
             
-            // 强制设置播放控制面板的位置，确保它在视口内可见
+            // 强制设置播放控制面板的位置，确保它在屏幕底部
             const playerPanel = document.getElementById('playerPanel');
             if (playerPanel) {
                 playerPanel.style.position = 'fixed';
                 playerPanel.style.left = '50%';
-                playerPanel.style.bottom = '110px';
+                playerPanel.style.bottom = '100px';
+                playerPanel.style.top = 'auto';
                 playerPanel.style.transform = 'translateX(-50%)';
                 playerPanel.style.zIndex = '100';
             }
