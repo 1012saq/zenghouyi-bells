@@ -2358,6 +2358,17 @@
         
         // UI面板可拖动和缩略（在3D场景初始化后执行）
         setTimeout(() => {
+            // 重置所有面板的位置，确保它们在正确的位置
+            document.querySelectorAll('.draggable-panel').forEach(panel => {
+                panel.style.position = '';
+                panel.style.left = '';
+                panel.style.top = '';
+                panel.style.right = '';
+                panel.style.bottom = '';
+                panel.style.transform = '';
+                panel.style.zIndex = '';
+            });
+            
             function makeDraggable(panel) {
                 let isDragging = false, startX, startY, initLeft, initTop;
                 const minBtn = panel.querySelector('.minimize-btn');
