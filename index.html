@@ -47,7 +47,7 @@
 
         /* 介绍面板 - 卷轴风 */
         .intro-panel {
-            position: fixed; left: 38px; top: 50%; transform: translateY(-50%);
+            position: fixed; left: 38px; top: 100px; transform: none;
             z-index: 100; width: 290px;
             background: linear-gradient(135deg, rgba(18,20,28,0.94) 0%, rgba(10,12,20,0.97) 100%);
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
@@ -505,7 +505,7 @@
         // 地面（宫殿深色大理石，偏红棕色）
         const groundGeo = new THREE.CircleGeometry(24, 72);
         const groundMat = new THREE.MeshStandardMaterial({
-            color: 0x1a0f0a, roughness: 0.45, metalness: 0.5,
+            color: 0x2a1510, roughness: 0.6, metalness: 0.2,
         });
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
