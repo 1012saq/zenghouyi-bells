@@ -448,14 +448,14 @@
         // ═══════════════════════════════════════════════════
         //  灯光系统（宴会暖光 + 多盏灯源）
         // ═══════════════════════════════════════════════════
-        const ambientLight = new THREE.AmbientLight(0x2a2e3a, 0.3);
+        const ambientLight = new THREE.AmbientLight(0x4a4e5a, 0.6);
         scene.add(ambientLight);
 
-        const hemiLight = new THREE.HemisphereLight(0x4a5068, 0x0a0810, 0.35);
+        const hemiLight = new THREE.HemisphereLight(0x6a7088, 0x2a1810, 0.6);
         scene.add(hemiLight);
 
         // 主光（暖金色，宴会顶光）
-        const mainLight = new THREE.SpotLight(0xffdca0, 5.0, 50, Math.PI / 4, 0.3, 0.9);
+        const mainLight = new THREE.SpotLight(0xffdca0, 8.0, 50, Math.PI / 4, 0.3, 0.9);
         mainLight.position.set(0, 16, 8);
         mainLight.target.position.set(0, 1.8, 0);
         mainLight.castShadow = true;
@@ -465,21 +465,21 @@
         scene.add(mainLight); scene.add(mainLight.target);
 
         // 冷色轮廓光（背后）
-        const rimLight = new THREE.DirectionalLight(0x6080c0, 1.6);
+        const rimLight = new THREE.DirectionalLight(0x6080c0, 2.0);
         rimLight.position.set(-2, 9, -12);
         scene.add(rimLight);
 
-        const rimLight2 = new THREE.DirectionalLight(0x4060a0, 0.9);
+        const rimLight2 = new THREE.DirectionalLight(0x4060a0, 1.2);
         rimLight2.position.set(9, 6, -7);
         scene.add(rimLight2);
 
         // 暖色补光
-        const fillLight = new THREE.DirectionalLight(0xe0a868, 0.65);
+        const fillLight = new THREE.DirectionalLight(0xe0a868, 1.2);
         fillLight.position.set(-9, 7, 9);
         scene.add(fillLight);
 
         // 底部暖光
-        const groundLight = new THREE.PointLight(0xd07040, 0.8, 18, 2);
+        const groundLight = new THREE.PointLight(0xd07040, 1.5, 18, 2);
         groundLight.position.set(0, 0.6, 5);
         scene.add(groundLight);
 
@@ -2332,6 +2332,11 @@
             if (introProgress >= 1) {
                 introProgress = 1;
                 introActive = false;
+                // 进场动画结束后，强制显示介绍面板
+                if (introPanel) {
+                    introPanel.classList.remove('hidden');
+                    introVisible = true;
+                }
             }
             const t = easeInOutCubic(introProgress);
             camera.position.lerpVectors(introStartPos, introEndPos, t);
