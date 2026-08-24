@@ -8,7 +8,7 @@
         @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Long+Cang&family=Liu+Jian+Mao+Cao&display=swap');
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'SimSun', '宋体', serif;
+            font-family: 'Noto Serif SC', serif;
             background: #0a0c12;
             color: #e8d8c0;
             overflow: hidden;
@@ -272,118 +272,6 @@
         }
         @media (max-width: 900px) { .side-decoration, .side-decoration-left { display: none; } }
     </style>
-    <style>
-        /* UI面板可拖动和缩略 */
-        .draggable-panel { position: relative; }
-        .panel-minimized {
-            width: 45px !important;
-            min-width: 45px !important;
-            height: 45px !important;
-            padding: 0 !important;
-            overflow: hidden !important;
-            border-radius: 50% !important;
-            display: flex !important;
-            align-items: center;
-            justify-content: center;
-        }
-        .panel-minimized > *:not(.minimize-btn) { display: none !important; }
-        .minimize-btn {
-            position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            border: 2px solid #d4b48c;
-            background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
-            color: #d4b48c;
-            font-size: 14px;
-            font-weight: bold;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 100;
-            line-height: 1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
-            transition: all 0.2s;
-        }
-        .minimize-btn:hover {
-            background: linear-gradient(135deg, #d4b48c, #b8956a);
-            color: #1a1410;
-            transform: scale(1.1);
-        }
-        .panel-minimized .minimize-btn {
-            position: relative;
-            top: auto;
-            right: auto;
-            width: 40px;
-            height: 40px;
-            font-size: 18px;
-        }
-        /* 曲目下拉菜单 */
-        .song-dropdown {
-            position: relative;
-            display: inline-block;
-        }
-        .song-dropdown-btn {
-            background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
-            border: 1px solid #d4b48c;
-            border-radius: 8px;
-            color: #d4b48c;
-            padding: 6px 14px;
-            font-size: 13px;
-            font-family: 'SimSun', '宋体', serif;
-            cursor: pointer;
-            transition: all 0.2s;
-            white-space: nowrap;
-        }
-        .song-dropdown-btn:hover {
-            background: linear-gradient(135deg, #d4b48c, #b8956a);
-            color: #1a1410;
-        }
-        .song-dropdown-menu {
-            display: none;
-            position: absolute;
-            bottom: 100%;
-            left: 0;
-            background: rgba(20, 16, 12, 0.95);
-            backdrop-filter: blur(12px);
-            border: 1px solid rgba(180, 140, 100, 0.4);
-            border-radius: 10px;
-            padding: 8px;
-            min-width: 140px;
-            box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
-            z-index: 200;
-        }
-        .song-dropdown-menu.show {
-            display: block;
-        }
-        .song-dropdown-menu .song-btn {
-            display: block;
-            width: 100%;
-            background: none;
-            border: none;
-            color: #c8b8a8;
-            padding: 8px 12px;
-            font-size: 13px;
-            font-family: 'SimSun', '宋体', serif;
-            cursor: pointer;
-            border-radius: 6px;
-            text-align: left;
-            transition: all 0.2s;
-            margin: 2px 0;
-        }
-        .song-dropdown-menu .song-btn:hover {
-            background: rgba(180, 140, 100, 0.2);
-            color: #d4b48c;
-        }
-        .song-dropdown-menu .song-btn.active {
-            background: linear-gradient(135deg, #d4b48c, #b8956a);
-            color: #1a1410;
-            font-weight: bold;
-        }
-    </style>
 </head>
 <body>
     <div class="loading" id="loading">
@@ -393,8 +281,7 @@
     </div>
     <div id="canvas-container"></div>
 
-    <div class="header draggable-panel" id="headerPanel">
-        <button class="minimize-btn" data-panel="header">−</button>
+    <div class="header">
         <h1>曾侯乙编钟</h1>
         <div class="sub">宫廷雅乐 · 湖北省博物馆藏 · 战国早期</div>
         <div class="seal">镇馆之宝 · 禁止出国展览</div>
@@ -403,8 +290,7 @@
     <div class="side-decoration">楚风汉韵 金石和鸣</div>
     <div class="side-decoration-left">钟鸣鼎食 礼乐之邦</div>
 
-    <div class="intro-panel draggable-panel" id="introPanel">
-        <button class="minimize-btn" data-panel="intro">−</button>
+    <div class="intro-panel" id="introPanel">
         <div class="panel-header">
             <div class="title">曾侯乙编钟</div>
             <div class="title-en">ZENGHOUYI CHIME BELLS</div>
@@ -417,26 +303,18 @@
         <div class="panel-footer">湖北省博物馆藏</div>
     </div>
 
-    <div class="info-panel draggable-panel" id="infoPanel">
-        <button class="minimize-btn" data-panel="info">−</button>
+    <div class="info-panel" id="infoPanel">
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
         <div class="pitch" id="bellPitch">🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介</div>
         <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1/2/3</span> 切换曲目</div>
     </div>
 
-    <div class="player-panel draggable-panel" id="playerPanel">
-        <button class="minimize-btn" data-panel="player">−</button>
-        <div class="song-dropdown" id="songDropdown">
-            <button class="song-dropdown-btn" id="songDropdownBtn">🎵 曲目 ▼</button>
-            <div class="song-dropdown-menu" id="songDropdownMenu">
-                <button class="song-btn active" data-song="0">小星星</button>
-                <button class="song-btn" data-song="1">茉莉花</button>
-                <button class="song-btn" data-song="2">欢乐颂</button>
-                <button class="song-btn" data-song="3">高山流水</button>
-                <button class="song-btn" data-song="4">梅花三弄</button>
-                <button class="song-btn" data-song="5">阳关三叠</button>
-            </div>
+    <div class="player-panel" id="playerPanel">
+        <div class="song-selector" id="songSelector">
+            <button class="song-btn active" data-song="0">小星星</button>
+            <button class="song-btn" data-song="1">茉莉花</button>
+            <button class="song-btn" data-song="2">欢乐颂</button>
         </div>
         <button class="play-btn" id="playBtn">▶</button>
         <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
@@ -472,8 +350,8 @@
 
         // ─── 场景 ───
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x2a2d38);
-        scene.fog = new THREE.FogExp2(0x2a2d38, 0.018);
+        scene.background = new THREE.Color(0x080a10);
+        scene.fog = new THREE.FogExp2(0x080a10, 0.022);
 
         const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 150);
         camera.position.set(13, 7, 16);
@@ -2132,36 +2010,6 @@
                 {f:N.C5,d:0.4},{f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.4},
                 {f:N.D5,d:0.6},{f:N.C5,d:0.2},{f:N.C5,d:0.8},
             ]},
-            { name:'高山流水', notes:[
-                {f:N.G4,d:0.5},{f:N.A4,d:0.5},{f:N.C5,d:0.6},
-                {f:N.D5,d:0.4},{f:N.E5,d:0.4},{f:N.G5,d:0.6},
-                {f:N.E5,d:0.4},{f:N.D5,d:0.4},{f:N.C5,d:0.6},
-                {f:N.A4,d:0.4},{f:N.G4,d:0.8},
-                {f:N.C5,d:0.5},{f:N.D5,d:0.5},{f:N.E5,d:0.6},
-                {f:N.G5,d:0.4},{f:N.A5,d:0.4},{f:N.G5,d:0.6},
-                {f:N.E5,d:0.4},{f:N.D5,d:0.4},{f:N.C5,d:0.8},
-                {f:N.REST,d:0.4},
-            ]},
-            { name:'梅花三弄', notes:[
-                {f:N.E5,d:0.4},{f:N.G5,d:0.4},{f:N.A5,d:0.6},
-                {f:N.G5,d:0.4},{f:N.E5,d:0.4},{f:N.D5,d:0.6},
-                {f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.6},
-                {f:N.G5,d:0.8},
-                {f:N.A5,d:0.4},{f:N.G5,d:0.4},{f:N.E5,d:0.6},
-                {f:N.D5,d:0.4},{f:N.C5,d:0.4},{f:N.D5,d:0.6},
-                {f:N.E5,d:0.8},
-                {f:N.REST,d:0.4},
-            ]},
-            { name:'阳关三叠', notes:[
-                {f:N.C5,d:0.4},{f:N.D5,d:0.4},{f:N.E5,d:0.6},
-                {f:N.G5,d:0.4},{f:N.E5,d:0.4},{f:N.D5,d:0.6},
-                {f:N.C5,d:0.4},{f:N.A4,d:0.4},{f:N.G4,d:0.6},
-                {f:N.A4,d:0.8},
-                {f:N.G4,d:0.4},{f:N.A4,d:0.4},{f:N.C5,d:0.6},
-                {f:N.D5,d:0.4},{f:N.E5,d:0.4},{f:N.D5,d:0.6},
-                {f:N.C5,d:0.8},
-                {f:N.REST,d:0.4},
-            ]},
         ];
         let currentSongIndex = 0, isPlaying = false, currentNoteIndex = 0, timeoutId = null, activeHighlightBell = null;
         function findClosestBell(freq) {
@@ -2265,14 +2113,6 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta(), elapsed = clock.getElapsedTime();
             controls.update(); updateIntroPanel();
-            
-            // 编钟标签特写时才显示
-            const cameraDistance = camera.position.distanceTo(controls.target);
-            const showLabels = cameraDistance < 10;
-            bellMeshes.forEach(bell => {
-                const label = bell.children.find(c => c instanceof CSS2DObject);
-                if (label) label.visible = showLabels;
-            });
             bellMeshes.forEach((bell, i) => { const offset = i * 0.11; bell.position.y += Math.sin(elapsed * 0.35 + offset) * 0.0007; });
             curtains.forEach((curtain) => {
                 const geo = curtain.geometry, pos = geo.attributes.position;
@@ -2343,70 +2183,6 @@
         document.addEventListener('click', initAudio, { once: true });
         document.addEventListener('touchstart', initAudio, { once: true });
         animate();
-        
-        // UI面板可拖动和缩略（在3D场景初始化后执行）
-        setTimeout(() => {
-            function makeDraggable(panel) {
-                let isDragging = false, startX, startY, initLeft, initTop;
-                const minBtn = panel.querySelector('.minimize-btn');
-                const handle = minBtn || panel;
-                
-                handle.addEventListener('mousedown', (e) => {
-                    if (e.target.tagName === 'BUTTON' && e.target !== minBtn) return;
-                    if (e.target.classList.contains('song-btn') || e.target.classList.contains('play-btn')) return;
-                    isDragging = true;
-                    startX = e.clientX; startY = e.clientY;
-                    const rect = panel.getBoundingClientRect();
-                    initLeft = rect.left; initTop = rect.top;
-                    panel.style.position = 'fixed';
-                    panel.style.left = initLeft + 'px';
-                    panel.style.top = initTop + 'px';
-                    panel.style.right = 'auto';
-                    panel.style.bottom = 'auto';
-                    panel.style.transform = 'none';
-                    panel.style.zIndex = '1000';
-                    e.preventDefault();
-                });
-                
-                document.addEventListener('mousemove', (e) => {
-                    if (!isDragging) return;
-                    panel.style.left = (initLeft + e.clientX - startX) + 'px';
-                    panel.style.top = (initTop + e.clientY - startY) + 'px';
-                });
-                
-                document.addEventListener('mouseup', () => { isDragging = false; });
-            }
-            
-            document.querySelectorAll('.draggable-panel').forEach(panel => {
-                makeDraggable(panel);
-                const minBtn = panel.querySelector('.minimize-btn');
-                if (minBtn) {
-                    minBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        panel.classList.toggle('panel-minimized');
-                        minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
-                    });
-                }
-            });
-            
-            // 曲目下拉菜单
-            const songDropdownBtn = document.getElementById('songDropdownBtn');
-            const songDropdownMenu = document.getElementById('songDropdownMenu');
-            if (songDropdownBtn && songDropdownMenu) {
-                songDropdownBtn.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    songDropdownMenu.classList.toggle('show');
-                });
-                document.addEventListener('click', (e) => {
-                    if (!songDropdownMenu.contains(e.target) && e.target !== songDropdownBtn) {
-                        songDropdownMenu.classList.remove('show');
-                    }
-                });
-            }
-            
-            console.log('UI面板可拖动和缩略功能已初始化');
-        }, 500);
-        
         setTimeout(() => { controlsHint.style.opacity = '0'; }, 12000);
         setTimeout(() => { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介'; }, 1700);
         console.log('🎵 曾侯乙编钟 · 宫廷雅乐 · 宴会版 v3');
