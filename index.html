@@ -362,8 +362,7 @@
         <div class="panel-footer">湖北省博物馆藏</div>
     </div>
 
-    <div class="info-panel draggable-panel" id="infoPanel">
-        <button class="minimize-btn" data-panel="info">−</button>
+    <div class="info-panel" id="infoPanel">
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
     </div>
@@ -402,7 +401,6 @@
         const loading = document.getElementById('loading');
         const infoName = document.getElementById('bellName');
         const infoDetail = document.getElementById('bellDetail');
-        const infoPitch = document.getElementById('bellPitch');
         const controlsHint = document.getElementById('controlsHint');
         const introPanel = document.getElementById('introPanel');
         const playBtn = document.getElementById('playBtn');
@@ -2145,16 +2143,16 @@
                     if (Array.isArray(mat)) mat.forEach(m => m.emissiveIntensity = 0.75); else mat.emissiveIntensity = 0.75;
                     renderer.domElement.style.cursor = 'pointer';
                     const data = hoveredBell.userData.bellData;
-                    infoName.textContent = `🔔 ${data.name}`; infoDetail.textContent = data.detail;
-                    infoPitch.textContent = `音高：${data.freq.toFixed(1)} Hz`;
+                    infoName.textContent = `🔔 ${data.name}`;
+                    infoDetail.textContent = `${data.detail} · 音高：${data.freq.toFixed(1)} Hz`;
                 } else {
                     if (selectedBell) {
                         const data = selectedBell.userData.bellData;
-                        infoName.textContent = `🔔 ${data.name}`; infoDetail.textContent = data.detail;
-                        infoPitch.textContent = `音高：${data.freq.toFixed(1)} Hz`;
+                        infoName.textContent = `🔔 ${data.name}`;
+                        infoDetail.textContent = `${data.detail} · 音高：${data.freq.toFixed(1)} Hz`;
                     } else {
-                        infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件';
-                        infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介';
+                        infoName.textContent = '🎵 点击编钟演奏';
+                        infoDetail.textContent = '曾侯乙墓出土 · 全套65件';
                     }
                 }
             }
@@ -2175,8 +2173,14 @@
                 if (Array.isArray(mat)) mat.forEach(m => m.emissiveIntensity = 1.4); else mat.emissiveIntensity = 1.4;
                 setTimeout(() => { if (Array.isArray(mat)) mat.forEach(m => m.emissiveIntensity = 0.12); else mat.emissiveIntensity = 0.12; }, 220);
                 selectedBell = bell;
-                infoName.textContent = `🔔 ${data.name}`; infoDetail.textContent = data.detail;
-                infoPitch.textContent = `音高：${freq.toFixed(1)} Hz`;
+                infoName.textContent = `🔔 ${data.name}`;
+                infoDetail.textContent = `${data.detail} · 音高：${freq.toFixed(1)} Hz`;
+                // 点击编钟时显示info-panel
+                const infoPanel = document.getElementById('infoPanel');
+                if (infoPanel) {
+                    infoPanel.style.opacity = '1';
+                    infoPanel.style.pointerEvents = 'auto';
+                }
                 bell.rotation.z = 0.032;
                 setTimeout(() => { bell.rotation.z = -0.02; }, 100);
                 setTimeout(() => { bell.rotation.z = 0.01; }, 230);
@@ -2199,6 +2203,7 @@
 
         let introVisible = true;
         let headerVisible = true;
+        let infoVisible = true;
         function updateIntroPanel() {
             const distance = camera.position.distanceTo(controls.target);
             if (distance < 8.5 && introVisible) { introPanel.classList.add('hidden'); introVisible = false; }
@@ -2207,6 +2212,10 @@
             const headerPanel = document.getElementById('headerPanel');
             if (distance < 12 && headerVisible) { headerPanel.style.opacity = '0'; headerPanel.style.pointerEvents = 'none'; headerVisible = false; }
             else if (distance > 14 && !headerVisible) { headerPanel.style.opacity = '1'; headerPanel.style.pointerEvents = 'none'; headerVisible = true; }
+            // 放大乐器时隐藏info-panel
+            const infoPanel = document.getElementById('infoPanel');
+            if (distance < 10 && infoVisible) { infoPanel.style.opacity = '0'; infoPanel.style.pointerEvents = 'none'; infoVisible = false; }
+            else if (distance > 12 && !infoVisible) { infoPanel.style.opacity = '1'; infoPanel.style.pointerEvents = 'auto'; infoVisible = true; }
         }
 
         // ═══════════════════════════════════════════════════
@@ -2310,8 +2319,8 @@
                     const vol = 0.22 + (data.size - 0.2) * 0.32;
                     playBellSound(note.f, Math.min(vol, 0.7), note.d * 1.8, data.size);
                     highlightBell(bell);
-                    infoName.textContent = `🎵 ${data.name}`; infoDetail.textContent = `自动演奏 · ${song.name} · ${data.detail}`;
-                    infoPitch.textContent = `音高：${note.f.toFixed(1)} Hz`;
+                    infoName.textContent = `🎵 ${data.name}`;
+                    infoDetail.textContent = `自动演奏 · ${song.name} · ${data.detail} · 音高：${note.f.toFixed(1)} Hz`;
                     bell.rotation.z = 0.028;
                     setTimeout(() => { bell.rotation.z = -0.014; }, 70);
                     setTimeout(() => { bell.rotation.z = 0; }, 160);
@@ -2338,7 +2347,7 @@
             const song = getCurrentSong();
             progressBar.style.width = '100%'; progressText.textContent = `${song.notes.length}/${song.notes.length}`;
             setTimeout(() => {
-                if (!isPlaying) { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介'; }
+                if (!isPlaying) { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; }
             }, 700);
         }
         function togglePlay() {
@@ -2355,18 +2364,18 @@
             btn.classList.add('active');
             progressBar.style.width = '0%';
             const song = getCurrentSong(); progressText.textContent = `0/${song.notes.length}`;
-            infoName.textContent = `🎵 曲目：${song.name}`; infoDetail.textContent = `点击播放按钮开始演奏`;
-            infoPitch.textContent = `共 ${song.notes.length} 个音符`;
+            infoName.textContent = `🎵 曲目：${song.name}`;
+            infoDetail.textContent = `点击播放按钮开始演奏 · 共 ${song.notes.length} 个音符`;
         });
         document.addEventListener('keydown', (e) => {
             if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
             if (e.key === ' ' || e.code === 'Space') { e.preventDefault(); togglePlay(); }
             else if (e.key === 'r' || e.key === 'R') {
                 e.preventDefault(); controls.autoRotate = !controls.autoRotate;
-                infoPitch.textContent = controls.autoRotate ? '🔄 自动旋转开启' : '⏸ 自动旋转暂停';
+                infoDetail.textContent = controls.autoRotate ? '🔄 自动旋转开启' : '⏸ 自动旋转暂停';
                 setTimeout(() => {
-                    if (selectedBell && !isPlaying) infoPitch.textContent = `音高：${selectedBell.userData.freq.toFixed(1)} Hz`;
-                    else if (!isPlaying) infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介';
+                    if (selectedBell && !isPlaying) infoDetail.textContent = `${selectedBell.userData.bellData.detail} · 音高：${selectedBell.userData.freq.toFixed(1)} Hz`;
+                    else if (!isPlaying) infoDetail.textContent = '曾侯乙墓出土 · 全套65件';
                 }, 1800);
             } else if (e.key >= '1' && e.key <= '3') {
                 const idx = parseInt(e.key) - 1;
@@ -2559,12 +2568,8 @@
                 let isDragging = false, startX, startY, initLeft, initTop, hasMoved = false;
                 const minBtn = panel.querySelector('.minimize-btn');
                 
-                // 整个面板都可以拖动
-                panel.addEventListener('mousedown', (e) => {
-                    // 如果点击的是minBtn，不触发拖拽
-                    if (e.target === minBtn) return;
-                    if (e.target.tagName === 'BUTTON') return;
-                    if (e.target.classList.contains('song-btn') || e.target.classList.contains('play-btn')) return;
+                // 启动拖动的函数
+                function startDrag(e) {
                     isDragging = true;
                     hasMoved = false;
                     startX = e.clientX; startY = e.clientY;
@@ -2578,7 +2583,31 @@
                     panel.style.transform = 'none';
                     panel.style.zIndex = '1000';
                     e.preventDefault();
+                }
+                
+                // 整个面板都可以拖动
+                panel.addEventListener('mousedown', (e) => {
+                    if (e.target === minBtn) return; // minBtn单独处理
+                    if (e.target.tagName === 'BUTTON') return;
+                    if (e.target.classList.contains('song-btn') || e.target.classList.contains('play-btn')) return;
+                    startDrag(e);
                 });
+                
+                // minBtn也可以拖动（特别是缩略后）
+                if (minBtn) {
+                    minBtn.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                        startDrag(e);
+                    });
+                    minBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        e.preventDefault();
+                        // 如果刚刚拖动过，不切换缩略状态
+                        if (hasMoved) { hasMoved = false; return; }
+                        panel.classList.toggle('panel-minimized');
+                        minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
+                    });
+                }
                 
                 document.addEventListener('mousemove', (e) => {
                     if (!isDragging) return;
@@ -2590,20 +2619,6 @@
                 });
                 
                 document.addEventListener('mouseup', () => { isDragging = false; });
-                
-                // minBtn点击切换缩略/展开状态
-                if (minBtn) {
-                    minBtn.addEventListener('mousedown', (e) => {
-                        e.stopPropagation();
-                        hasMoved = false;
-                    });
-                    minBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        e.preventDefault();
-                        panel.classList.toggle('panel-minimized');
-                        minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
-                    });
-                }
             }
             
             document.querySelectorAll('.draggable-panel').forEach(panel => {
@@ -2614,7 +2629,7 @@
         }, 500);
         
         setTimeout(() => { controlsHint.style.opacity = '0'; }, 12000);
-        setTimeout(() => { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; infoPitch.textContent = '🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介'; }, 1700);
+        setTimeout(() => { infoName.textContent = '🎵 点击编钟演奏'; infoDetail.textContent = '曾侯乙墓出土 · 全套65件'; }, 1700);
         console.log('🎵 曾侯乙编钟 · 宫廷雅乐 · 宴会版 v3');
     </script>
 </body>
