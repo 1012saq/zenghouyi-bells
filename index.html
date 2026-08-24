@@ -5,10 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>曾侯乙编钟 · 宫廷雅乐 · 自动演奏</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@300;400;600;700;900&family=ZCOOL+XiaoWei&family=Ma+Shan+Zheng&family=Long+Cang&family=Liu+Jian+Mao+Cao&display=swap');
+        
         * { margin:0; padding:0; box-sizing:border-box; }
         body {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             background: #0a0c12;
             color: #e8d8c0;
             overflow: hidden;
@@ -90,12 +90,12 @@
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .intro-panel .title-en {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 8px; letter-spacing: 4px; color: #6a7080;
             margin-top: 4px; text-transform: uppercase; font-weight: 300;
         }
         .intro-panel .content {
-            padding: 18px 22px; font-family: 'Noto Serif SC', serif;
+            padding: 18px 22px; font-family: 'SimSun', '宋体', serif;
             font-size: 13px; line-height: 2; letter-spacing: 0.8px; color: #b8b0a0;
             font-weight: 300;
         }
@@ -139,15 +139,15 @@
             font-size: 21px; font-weight: 400; color: #f0e0b8; letter-spacing: 3px;
         }
         .info-panel .detail {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 12px; color: #c8a878; margin-top: 4px; letter-spacing: 1.5px; font-weight: 300;
         }
         .info-panel .pitch {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 12px; color: #9098a8; margin-top: 2px; letter-spacing: 1px; font-weight: 300;
         }
         .info-panel .hint {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 11px; color: #5a6070; margin-top: 6px; font-style: italic; font-weight: 300;
         }
         .info-panel .hint span { color: #d8b878; }
@@ -198,7 +198,7 @@
             box-shadow: 0 0 12px rgba(230,150,50,0.55);
         }
         .player-panel .progress-text {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 11px; color: #6a7080; min-width: 38px; text-align: center; font-weight: 300;
         }
         @media (max-width: 768px) {
@@ -1437,14 +1437,14 @@
             ctx.fillStyle = `hsla(42, 85%, 65%, 0.8)`;
             ctx.textAlign = 'center';
             const mainText = bellType === 'bo' ? '曾侯乙作持' : '曾侯乙';
-            ctx.font = 'bold 19px "ZCOOL XiaoWei", "Noto Serif SC", serif';
+            ctx.font = 'bold 19px "ZCOOL XiaoWei", 'SimSun', '宋体', serif';
             ctx.fillText(mainText, canvas.width/2, 128);
-            ctx.font = 'bold 12px "Noto Serif SC", serif';
+            ctx.font = 'bold 12px 'SimSun', '宋体', serif';
             const pitchNames = ['宫', '羽', '宫曾', '羽曾'];
             for (let i = 0; i < 4; i++) {
                 ctx.fillText(pitchNames[i % pitchNames.length], 38 + i * 58, canvas.height - 102);
             }
-            ctx.font = '9px "Noto Serif SC", serif';
+            ctx.font = '9px 'SimSun', '宋体', serif';
             ctx.fillStyle = `hsla(42, 75%, 58%, 0.55)`;
             const lawNames = ['黄钟', '太簇', '姑洗', '林钟', '南吕'];
             for (let i = 0; i < 5; i++) {
