@@ -260,16 +260,18 @@
         .side-decoration {
             position: fixed; right: 28px; top: 50%; transform: translateY(-50%);
             z-index: 10; writing-mode: vertical-rl;
-            font-family: 'Long Cang', cursive;
-            font-size: 22px; color: rgba(210,170,100,0.14); letter-spacing: 16px;
+            font-family: 'SimSun', '宋体', serif;
+            font-size: 18px; color: rgba(210,170,100,0.18); letter-spacing: 8px;
             pointer-events: none; text-shadow: 0 0 24px rgba(210,170,100,0.1);
+            white-space: nowrap;
         }
         .side-decoration-left {
             position: fixed; left: 28px; top: 50%; transform: translateY(-50%);
             z-index: 10; writing-mode: vertical-rl;
-            font-family: 'Long Cang', cursive;
-            font-size: 20px; color: rgba(210,170,100,0.1); letter-spacing: 14px;
+            font-family: 'SimSun', '宋体', serif;
+            font-size: 16px; color: rgba(210,170,100,0.12); letter-spacing: 6px;
             pointer-events: none;
+            white-space: nowrap;
         }
         @media (max-width: 900px) { .side-decoration, .side-decoration-left { display: none; } }
     </style>
@@ -337,8 +339,7 @@
     </div>
     <div id="canvas-container"></div>
 
-    <div class="header draggable-panel" id="headerPanel">
-        <button class="minimize-btn" data-panel="header">−</button>
+    <div class="header" id="headerPanel">
         <h1>曾侯乙编钟</h1>
         <div class="sub">宫廷雅乐 · 湖北省博物馆藏 · 战国早期</div>
         <div class="seal">镇馆之宝 · 禁止出国展览</div>
@@ -365,8 +366,6 @@
         <button class="minimize-btn" data-panel="info">−</button>
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
-        <div class="pitch" id="bellPitch">🖱 拖动旋转 · 滚轮缩放 · 自由查看细节</div>
-        <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1-6</span> 切换曲目 · 面板右上角<span>金色按钮</span>可缩略/拖动</div>
     </div>
 
     <div class="player-panel draggable-panel" id="playerPanel">
@@ -1365,6 +1364,140 @@
         ];
         curtains.forEach(c => scene.add(c));
 
+        // 青瓷花瓶（两侧，雅乐场景装饰）
+        function createVase(pos, scale = 1) {
+            const group = new THREE.Group();
+            const porcelainMat = new THREE.MeshStandardMaterial({ 
+                color: 0x8ac0d0, roughness: 0.3, metalness: 0.1,
+                emissive: 0x1a3040, emissiveIntensity: 0.1
+            });
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xc89848, metalness: 0.9, roughness: 0.3 });
+            // 瓶身（LatheGeometry创建花瓶形状）
+            const points = [];
+            for (let i = 0; i <= 20; i++) {
+                const t = i / 20;
+                const y = t * 1.2 * scale;
+                let r;
+                if (t < 0.15) r = 0.12 * scale + t * 0.3 * scale;
+                else if (t < 0.5) r = 0.25 * scale + Math.sin(t * Math.PI) * 0.1 * scale;
+                else if (t < 0.8) r = 0.3 * scale - (t - 0.5) * 0.4 * scale;
+                else r = 0.12 * scale - (t - 0.8) * 0.2 * scale;
+                points.push(new THREE.Vector2(Math.max(r, 0.05), y));
+            }
+            const vaseGeo = new THREE.LatheGeometry(points, 24);
+            const vase = new THREE.Mesh(vaseGeo, porcelainMat);
+            vase.castShadow = true; vase.receiveShadow = true;
+            group.add(vase);
+            // 瓶口金边
+            const rim = new THREE.Mesh(new THREE.TorusGeometry(0.12 * scale, 0.015 * scale, 8, 20), goldMat);
+            rim.position.y = 1.2 * scale; rim.rotation.x = Math.PI / 2;
+            group.add(rim);
+            // 瓶底金边
+            const baseRim = new THREE.Mesh(new THREE.TorusGeometry(0.15 * scale, 0.012 * scale, 8, 20), goldMat);
+            baseRim.position.y = 0.02 * scale; baseRim.rotation.x = Math.PI / 2;
+            group.add(baseRim);
+            // 瓶身纹饰（简单金色线条）
+            for (let i = 0; i < 3; i++) {
+                const decoRing = new THREE.Mesh(new THREE.TorusGeometry(0.22 * scale, 0.008 * scale, 6, 24), goldMat);
+                decoRing.position.y = (0.3 + i * 0.25) * scale; decoRing.rotation.x = Math.PI / 2;
+                group.add(decoRing);
+            }
+            // 插花（简单的花枝）
+            const flowerMat = new THREE.MeshStandardMaterial({ color: 0xe85050, roughness: 0.6, metalness: 0.1, emissive: 0x401010, emissiveIntensity: 0.2 });
+            const stemMat = new THREE.MeshStandardMaterial({ color: 0x3a5020, roughness: 0.7 });
+            for (let i = 0; i < 3; i++) {
+                const angle = (i / 3) * Math.PI * 2;
+                const stem = new THREE.Mesh(new THREE.CylinderGeometry(0.01 * scale, 0.015 * scale, 0.5 * scale, 6), stemMat);
+                stem.position.set(Math.cos(angle) * 0.05 * scale, 1.4 * scale, Math.sin(angle) * 0.05 * scale);
+                stem.rotation.z = Math.cos(angle) * 0.2;
+                stem.rotation.x = Math.sin(angle) * 0.2;
+                group.add(stem);
+                const flower = new THREE.Mesh(new THREE.SphereGeometry(0.06 * scale, 8, 6), flowerMat);
+                flower.position.set(Math.cos(angle) * 0.15 * scale, 1.65 * scale, Math.sin(angle) * 0.15 * scale);
+                group.add(flower);
+            }
+            group.position.copy(pos);
+            return group;
+        }
+        scene.add(createVase(new THREE.Vector3(-7, 0, 4), 1.0));
+        scene.add(createVase(new THREE.Vector3(7, 0, 4), 1.0));
+
+        // 墙上挂画（宫殿装饰）
+        function createWallPainting(pos, rotY, width = 2.5, height = 1.8) {
+            const group = new THREE.Group();
+            const frameMat = new THREE.MeshStandardMaterial({ color: 0x5a3010, roughness: 0.5, metalness: 0.3 });
+            const goldMat = new THREE.MeshStandardMaterial({ color: 0xc89848, metalness: 0.9, roughness: 0.3 });
+            // 画框
+            const frame = new THREE.Mesh(new THREE.BoxGeometry(width + 0.15, height + 0.15, 0.08), frameMat);
+            group.add(frame);
+            // 画框金边
+            const goldFrame = new THREE.Mesh(new THREE.BoxGeometry(width + 0.1, height + 0.1, 0.02), goldMat);
+            goldFrame.position.z = 0.04;
+            group.add(goldFrame);
+            // 画布（用CanvasTexture绘制简单山水画）
+            const canvas = document.createElement('canvas');
+            canvas.width = 512; canvas.height = 384;
+            const ctx = canvas.getContext('2d');
+            // 背景渐变（古纸色）
+            const grad = ctx.createLinearGradient(0, 0, 0, 384);
+            grad.addColorStop(0, '#e8d8b0');
+            grad.addColorStop(1, '#d0b888');
+            ctx.fillStyle = grad;
+            ctx.fillRect(0, 0, 512, 384);
+            // 远山
+            ctx.fillStyle = 'rgba(80,70,60,0.3)';
+            ctx.beginPath();
+            ctx.moveTo(0, 250);
+            ctx.bezierCurveTo(100, 180, 200, 220, 300, 160);
+            ctx.bezierCurveTo(400, 200, 450, 180, 512, 220);
+            ctx.lineTo(512, 384); ctx.lineTo(0, 384);
+            ctx.fill();
+            // 近山
+            ctx.fillStyle = 'rgba(60,50,40,0.5)';
+            ctx.beginPath();
+            ctx.moveTo(0, 300);
+            ctx.bezierCurveTo(80, 240, 180, 280, 280, 230);
+            ctx.bezierCurveTo(380, 270, 450, 250, 512, 290);
+            ctx.lineTo(512, 384); ctx.lineTo(0, 384);
+            ctx.fill();
+            // 松树
+            ctx.strokeStyle = 'rgba(40,30,20,0.7)';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.moveTo(100, 320); ctx.lineTo(100, 260);
+            ctx.moveTo(400, 330); ctx.lineTo(400, 270);
+            ctx.stroke();
+            ctx.fillStyle = 'rgba(30,50,25,0.6)';
+            for (let [x, y] of [[100, 255], [400, 265]]) {
+                ctx.beginPath();
+                ctx.arc(x, y, 20, 0, Math.PI * 2);
+                ctx.fill();
+            }
+            // 题字
+            ctx.font = 'bold 28px "SimSun", serif';
+            ctx.fillStyle = 'rgba(60,40,20,0.8)';
+            ctx.fillText('雅乐', 420, 60);
+            ctx.font = '16px "SimSun", serif';
+            ctx.fillText('金石和鸣', 420, 90);
+            // 印章
+            ctx.fillStyle = 'rgba(180,40,30,0.7)';
+            ctx.fillRect(430, 100, 30, 30);
+            ctx.fillStyle = '#fff';
+            ctx.font = '14px "SimSun", serif';
+            ctx.fillText('藏', 437, 120);
+
+            const texture = new THREE.CanvasTexture(canvas);
+            const paintingMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.8, metalness: 0.0 });
+            const painting = new THREE.Mesh(new THREE.PlaneGeometry(width, height), paintingMat);
+            painting.position.z = 0.05;
+            group.add(painting);
+            group.position.copy(pos);
+            group.rotation.y = rotY;
+            return group;
+        }
+        scene.add(createWallPainting(new THREE.Vector3(-9, 3.5, -5), 0.3, 2.2, 1.6));
+        scene.add(createWallPainting(new THREE.Vector3(9, 3.5, -5), -0.3, 2.2, 1.6));
+
         // 飘落银杏叶
         const leafCount = 100;
         const leafPos = new Float32Array(leafCount * 3);
@@ -2065,10 +2198,15 @@
         });
 
         let introVisible = true;
+        let headerVisible = true;
         function updateIntroPanel() {
             const distance = camera.position.distanceTo(controls.target);
             if (distance < 8.5 && introVisible) { introPanel.classList.add('hidden'); introVisible = false; }
             else if (distance > 10.5 && !introVisible) { introPanel.classList.remove('hidden'); introVisible = true; }
+            // 放大乐器时隐藏header
+            const headerPanel = document.getElementById('headerPanel');
+            if (distance < 12 && headerVisible) { headerPanel.style.opacity = '0'; headerPanel.style.pointerEvents = 'none'; headerVisible = false; }
+            else if (distance > 14 && !headerVisible) { headerPanel.style.opacity = '1'; headerPanel.style.pointerEvents = 'none'; headerVisible = true; }
         }
 
         // ═══════════════════════════════════════════════════
@@ -2418,14 +2556,15 @@
             }
             
             function makeDraggable(panel) {
-                let isDragging = false, startX, startY, initLeft, initTop;
+                let isDragging = false, startX, startY, initLeft, initTop, hasMoved = false;
                 const minBtn = panel.querySelector('.minimize-btn');
-                const handle = minBtn || panel;
                 
-                handle.addEventListener('mousedown', (e) => {
+                // 整个面板都可以拖动
+                panel.addEventListener('mousedown', (e) => {
                     if (e.target.tagName === 'BUTTON' && e.target !== minBtn) return;
                     if (e.target.classList.contains('song-btn') || e.target.classList.contains('play-btn')) return;
                     isDragging = true;
+                    hasMoved = false;
                     startX = e.clientX; startY = e.clientY;
                     const rect = panel.getBoundingClientRect();
                     initLeft = rect.left; initTop = rect.top;
@@ -2441,11 +2580,25 @@
                 
                 document.addEventListener('mousemove', (e) => {
                     if (!isDragging) return;
-                    panel.style.left = (initLeft + e.clientX - startX) + 'px';
-                    panel.style.top = (initTop + e.clientY - startY) + 'px';
+                    const dx = e.clientX - startX;
+                    const dy = e.clientY - startY;
+                    if (Math.abs(dx) > 3 || Math.abs(dy) > 3) hasMoved = true;
+                    panel.style.left = (initLeft + dx) + 'px';
+                    panel.style.top = (initTop + dy) + 'px';
                 });
                 
                 document.addEventListener('mouseup', () => { isDragging = false; });
+                
+                // minBtn点击切换缩略/展开状态
+                if (minBtn) {
+                    minBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        // 如果刚刚拖动过，不切换缩略状态
+                        if (hasMoved) { hasMoved = false; return; }
+                        panel.classList.toggle('panel-minimized');
+                        minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
+                    });
+                }
             }
             
             document.querySelectorAll('.draggable-panel').forEach(panel => {
