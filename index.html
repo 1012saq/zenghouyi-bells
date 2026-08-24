@@ -84,20 +84,20 @@
         .intro-panel .panel-header::before { left: 14px; }
         .intro-panel .panel-header::after { right: 14px; }
         .intro-panel .title {
-            font-family: 'ZCOOL XiaoWei', serif;
-            font-size: 26px; font-weight: 400; letter-spacing: 8px;
+            font-family: 'SimSun', '宋体', serif;
+            font-size: 26px; font-weight: 900; letter-spacing: 8px;
             background: linear-gradient(180deg, #f0e0b8, #c89858);
             -webkit-background-clip: text; -webkit-text-fill-color: transparent;
         }
         .intro-panel .title-en {
-            font-family: 'Noto Serif SC', serif;
+            font-family: 'SimSun', '宋体', serif;
             font-size: 8px; letter-spacing: 4px; color: #6a7080;
-            margin-top: 4px; text-transform: uppercase; font-weight: 300;
+            margin-top: 4px; text-transform: uppercase; font-weight: 700;
         }
         .intro-panel .content {
-            padding: 18px 22px; font-family: 'Noto Serif SC', serif;
+            padding: 18px 22px; font-family: 'SimSun', '宋体', serif;
             font-size: 13px; line-height: 2; letter-spacing: 0.8px; color: #b8b0a0;
-            font-weight: 300;
+            font-weight: 400;
         }
         .intro-panel .content p { margin-bottom: 12px; text-indent: 2em; }
         .intro-panel .content .highlight {
@@ -113,8 +113,9 @@
         }
         .intro-panel .panel-footer {
             padding: 12px 20px 16px; text-align: center;
-            font-family: 'Ma Shan Zheng', cursive;
-            font-size: 12px; color: #7a7888; letter-spacing: 3px;
+            font-family: 'SimSun', '宋体', serif;
+            font-size: 13px; color: #e8c080; letter-spacing: 3px;
+            font-weight: 700;
             border-top: 1px solid rgba(210,170,100,0.12);
         }
         @media (max-width: 768px) {
@@ -289,23 +290,23 @@
         .panel-minimized > *:not(.minimize-btn) { display: none !important; }
         .minimize-btn {
             position: absolute;
-            top: 6px;
-            right: 6px;
-            width: 28px;
-            height: 28px;
+            top: 8px;
+            right: 8px;
+            width: 36px;
+            height: 36px;
             border-radius: 50%;
             border: 2px solid #d4b48c;
             background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
             color: #d4b48c;
-            font-size: 16px;
+            font-size: 20px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 100;
+            z-index: 200;
             line-height: 1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(212,180,140,0.3);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 16px rgba(212,180,140,0.5);
             transition: all 0.2s;
             animation: pulse 2s ease-in-out infinite;
         }
@@ -364,8 +365,8 @@
         <button class="minimize-btn" data-panel="info">−</button>
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
-        <div class="pitch" id="bellPitch">🖱 拖动旋转 · 滚轮缩放 · 拉近隐藏简介</div>
-        <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1/2/3</span> 切换曲目</div>
+        <div class="pitch" id="bellPitch">🖱 拖动旋转 · 滚轮缩放 · 自由查看细节</div>
+        <div class="hint">⌨️ <span>空格</span> 播放/暂停 · <span>R</span> 自动旋转 · <span>1-6</span> 切换曲目 · 面板右上角<span>金色按钮</span>可缩略/拖动</div>
     </div>
 
     <div class="player-panel draggable-panel" id="playerPanel">
@@ -416,7 +417,7 @@
         scene.fog = new THREE.FogExp2(0x1a0f0a, 0.015);
 
         const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 150);
-        camera.position.set(13, 7, 16);
+        camera.position.set(0, 6, 18);
         camera.lookAt(0, 2, 0);
 
         const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: false });
@@ -436,12 +437,15 @@
 
         const controls = new OrbitControls(camera, renderer.domElement);
         controls.enableDamping = true;
-        controls.dampingFactor = 0.045;
+        controls.dampingFactor = 0.08;
         controls.autoRotate = false;
         controls.autoRotateSpeed = 0.35;
-        controls.minDistance = 4;
-        controls.maxDistance = 35;
-        controls.maxPolarAngle = Math.PI / 2.08;
+        controls.minDistance = 3;
+        controls.maxDistance = 40;
+        controls.maxPolarAngle = Math.PI / 1.8;
+        controls.rotateSpeed = 0.8;
+        controls.zoomSpeed = 0.8;
+        controls.panSpeed = 0.6;
         controls.target.set(0, 2, 0);
         controls.update();
 
@@ -498,10 +502,10 @@
         //  宴会雅乐场景环境
         // ═══════════════════════════════════════════════════
 
-        // 地面（深色大理石）
+        // 地面（宫殿深色大理石，偏红棕色）
         const groundGeo = new THREE.CircleGeometry(24, 72);
         const groundMat = new THREE.MeshStandardMaterial({
-            color: 0x0c0e16, roughness: 0.45, metalness: 0.5,
+            color: 0x1a0f0a, roughness: 0.45, metalness: 0.5,
         });
         const ground = new THREE.Mesh(groundGeo, groundMat);
         ground.rotation.x = -Math.PI / 2;
@@ -2312,9 +2316,9 @@
         document.addEventListener('click', initAudio, { once: true });
         document.addEventListener('touchstart', initAudio, { once: true });
         
-        // 进场动画：相机从远处慢慢拉近
-        const introStartPos = new THREE.Vector3(20, 10, 22);
-        const introEndPos = new THREE.Vector3(13, 7, 16);
+        // 进场动画：相机从远处慢慢拉近（正面视角）
+        const introStartPos = new THREE.Vector3(0, 10, 28);
+        const introEndPos = new THREE.Vector3(0, 6, 18);
         const introStartTarget = new THREE.Vector3(0, 3, 0);
         const introEndTarget = new THREE.Vector3(0, 2, 0);
         let introProgress = 0;
