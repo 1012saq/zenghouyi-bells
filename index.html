@@ -289,32 +289,99 @@
         .panel-minimized > *:not(.minimize-btn) { display: none !important; }
         .minimize-btn {
             position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 20px;
-            height: 20px;
+            top: 6px;
+            right: 6px;
+            width: 24px;
+            height: 24px;
             border-radius: 50%;
-            border: 1px solid rgba(180,140,100,0.4);
-            background: rgba(20,16,12,0.8);
+            border: 2px solid #d4b48c;
+            background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
             color: #d4b48c;
-            font-size: 12px;
+            font-size: 14px;
+            font-weight: bold;
             cursor: pointer;
             display: flex;
             align-items: center;
             justify-content: center;
             z-index: 100;
             line-height: 1;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            transition: all 0.2s;
         }
         .minimize-btn:hover {
-            background: rgba(180,140,100,0.3);
+            background: linear-gradient(135deg, #d4b48c, #b8956a);
+            color: #1a1410;
+            transform: scale(1.1);
         }
         .panel-minimized .minimize-btn {
             position: relative;
             top: auto;
             right: auto;
-            width: 35px;
-            height: 35px;
-            font-size: 16px;
+            width: 40px;
+            height: 40px;
+            font-size: 18px;
+        }
+        /* 曲目下拉菜单 */
+        .song-dropdown {
+            position: relative;
+            display: inline-block;
+        }
+        .song-dropdown-btn {
+            background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
+            border: 1px solid #d4b48c;
+            border-radius: 8px;
+            color: #d4b48c;
+            padding: 6px 14px;
+            font-size: 13px;
+            font-family: 'SimSun', '宋体', serif;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        .song-dropdown-btn:hover {
+            background: linear-gradient(135deg, #d4b48c, #b8956a);
+            color: #1a1410;
+        }
+        .song-dropdown-menu {
+            display: none;
+            position: absolute;
+            bottom: 100%;
+            left: 0;
+            background: rgba(20, 16, 12, 0.95);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(180, 140, 100, 0.4);
+            border-radius: 10px;
+            padding: 8px;
+            min-width: 140px;
+            box-shadow: 0 -4px 20px rgba(0,0,0,0.6);
+            z-index: 200;
+        }
+        .song-dropdown-menu.show {
+            display: block;
+        }
+        .song-dropdown-menu .song-btn {
+            display: block;
+            width: 100%;
+            background: none;
+            border: none;
+            color: #c8b8a8;
+            padding: 8px 12px;
+            font-size: 13px;
+            font-family: 'SimSun', '宋体', serif;
+            cursor: pointer;
+            border-radius: 6px;
+            text-align: left;
+            transition: all 0.2s;
+            margin: 2px 0;
+        }
+        .song-dropdown-menu .song-btn:hover {
+            background: rgba(180, 140, 100, 0.2);
+            color: #d4b48c;
+        }
+        .song-dropdown-menu .song-btn.active {
+            background: linear-gradient(135deg, #d4b48c, #b8956a);
+            color: #1a1410;
+            font-weight: bold;
         }
     </style>
 </head>
@@ -360,13 +427,16 @@
 
     <div class="player-panel draggable-panel" id="playerPanel">
         <button class="minimize-btn" data-panel="player">−</button>
-        <div class="song-selector" id="songSelector">
-            <button class="song-btn active" data-song="0">小星星</button>
-            <button class="song-btn" data-song="1">茉莉花</button>
-            <button class="song-btn" data-song="2">欢乐颂</button>
-            <button class="song-btn" data-song="3">高山流水</button>
-            <button class="song-btn" data-song="4">梅花三弄</button>
-            <button class="song-btn" data-song="5">阳关三叠</button>
+        <div class="song-dropdown" id="songDropdown">
+            <button class="song-dropdown-btn" id="songDropdownBtn">🎵 曲目 ▼</button>
+            <div class="song-dropdown-menu" id="songDropdownMenu">
+                <button class="song-btn active" data-song="0">小星星</button>
+                <button class="song-btn" data-song="1">茉莉花</button>
+                <button class="song-btn" data-song="2">欢乐颂</button>
+                <button class="song-btn" data-song="3">高山流水</button>
+                <button class="song-btn" data-song="4">梅花三弄</button>
+                <button class="song-btn" data-song="5">阳关三叠</button>
+            </div>
         </div>
         <button class="play-btn" id="playBtn">▶</button>
         <div class="progress-container"><div class="progress-bar" id="progressBar"></div></div>
@@ -402,8 +472,8 @@
 
         // ─── 场景 ───
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x080a10);
-        scene.fog = new THREE.FogExp2(0x080a10, 0.022);
+        scene.background = new THREE.Color(0x2a2d38);
+        scene.fog = new THREE.FogExp2(0x2a2d38, 0.018);
 
         const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 150);
         camera.position.set(13, 7, 16);
@@ -1814,6 +1884,95 @@
         scene.add(bellGroup);
         scene.add(createRack());
 
+        // 宫殿场景元素（庄重辉煌大气）
+        const palaceRedMat = new THREE.MeshStandardMaterial({ color: 0x6a1a10, roughness: 0.5, metalness: 0.2 });
+        const palaceGoldMat = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.35, metalness: 0.7 });
+        const palaceDarkMat = new THREE.MeshStandardMaterial({ color: 0x2a1a0a, roughness: 0.6, metalness: 0.1 });
+        
+        // 宫殿柱子（4根，红色+金色装饰）
+        const pillarPositions = [[-8, 0, -5], [-8, 0, 5], [8, 0, -5], [8, 0, 5]];
+        pillarPositions.forEach(([x, y, z]) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.35, 0.4, 6.5, 12), palaceRedMat);
+            pillar.position.set(x, 3.25, z);
+            pillar.castShadow = true;
+            pillar.receiveShadow = true;
+            scene.add(pillar);
+            // 金色柱箍
+            for (let gy = 1.5; gy <= 5; gy += 1.75) {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.37, 0.03, 6, 12), palaceGoldMat);
+                ring.position.set(x, gy, z);
+                ring.rotation.x = Math.PI / 2;
+                scene.add(ring);
+            }
+            // 柱基
+            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.55, 0.6, 0.4, 12), palaceDarkMat);
+            base.position.set(x, 0.2, z);
+            base.castShadow = true;
+            scene.add(base);
+            // 柱头
+            const capital = new THREE.Mesh(new THREE.BoxGeometry(0.9, 0.3, 0.9), palaceGoldMat);
+            capital.position.set(x, 6.6, z);
+            capital.castShadow = true;
+            scene.add(capital);
+        });
+        
+        // 宫殿横梁（金色装饰）
+        for (let z of [-5, 5]) {
+            const beam = new THREE.Mesh(new THREE.BoxGeometry(17, 0.35, 0.5), palaceDarkMat);
+            beam.position.set(0, 6.4, z);
+            beam.castShadow = true;
+            scene.add(beam);
+            const beamGold = new THREE.Mesh(new THREE.BoxGeometry(17, 0.08, 0.52), palaceGoldMat);
+            beamGold.position.set(0, 6.6, z);
+            scene.add(beamGold);
+        }
+        
+        // 宫殿地板（金砖效果）
+        const floorCanvas = document.createElement('canvas');
+        floorCanvas.width = 128; floorCanvas.height = 128;
+        const floorCtx = floorCanvas.getContext('2d');
+        floorCtx.fillStyle = '#3a3028';
+        floorCtx.fillRect(0, 0, 128, 128);
+        for (let y = 0; y < 128; y += 32) {
+            for (let x = 0; x < 128; x += 32) {
+                const brightness = 0.85 + Math.random() * 0.25;
+                floorCtx.fillStyle = `rgb(${Math.floor(58*brightness)},${Math.floor(48*brightness)},${Math.floor(40*brightness)})`;
+                floorCtx.fillRect(x+1, y+1, 30, 30);
+            }
+        }
+        floorCtx.strokeStyle = 'rgba(20,15,10,0.6)';
+        floorCtx.lineWidth = 2;
+        for (let i = 0; i <= 128; i += 32) {
+            floorCtx.beginPath(); floorCtx.moveTo(i, 0); floorCtx.lineTo(i, 128); floorCtx.stroke();
+            floorCtx.beginPath(); floorCtx.moveTo(0, i); floorCtx.lineTo(128, i); floorCtx.stroke();
+        }
+        const floorTexture = new THREE.CanvasTexture(floorCanvas);
+        floorTexture.wrapS = THREE.RepeatWrapping;
+        floorTexture.wrapT = THREE.RepeatWrapping;
+        floorTexture.repeat.set(6, 6);
+        const palaceFloor = new THREE.Mesh(
+            new THREE.PlaneGeometry(24, 24),
+            new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.5, metalness: 0.2 })
+        );
+        palaceFloor.rotation.x = -Math.PI / 2;
+        palaceFloor.position.y = -0.05;
+        palaceFloor.receiveShadow = true;
+        scene.add(palaceFloor);
+        
+        // 宫殿背景墙（深色+金色装饰）
+        const bgWallMat = new THREE.MeshStandardMaterial({ color: 0x1a1008, roughness: 0.8, metalness: 0.1 });
+        const bgWall = new THREE.Mesh(new THREE.PlaneGeometry(20, 8), bgWallMat);
+        bgWall.position.set(0, 4, -8);
+        bgWall.receiveShadow = true;
+        scene.add(bgWall);
+        // 背景墙金色边框
+        const bgFrameTop = new THREE.Mesh(new THREE.BoxGeometry(20.5, 0.15, 0.1), palaceGoldMat);
+        bgFrameTop.position.set(0, 8, -7.9);
+        scene.add(bgFrameTop);
+        const bgFrameBottom = new THREE.Mesh(new THREE.BoxGeometry(20.5, 0.15, 0.1), palaceGoldMat);
+        bgFrameBottom.position.set(0, 0, -7.9);
+        scene.add(bgFrameBottom);
+
         bellMeshes.forEach((bell) => {
             const data = bell.userData.bellData;
             const div = document.createElement('div');
@@ -2318,6 +2477,21 @@
                     });
                 }
             });
+            
+            // 曲目下拉菜单
+            const songDropdownBtn = document.getElementById('songDropdownBtn');
+            const songDropdownMenu = document.getElementById('songDropdownMenu');
+            if (songDropdownBtn && songDropdownMenu) {
+                songDropdownBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    songDropdownMenu.classList.toggle('show');
+                });
+                document.addEventListener('click', (e) => {
+                    if (!songDropdownMenu.contains(e.target) && e.target !== songDropdownBtn) {
+                        songDropdownMenu.classList.remove('show');
+                    }
+                });
+            }
             
             console.log('UI面板可拖动和缩略功能已初始化');
         }, 500);
