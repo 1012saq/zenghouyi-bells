@@ -48,7 +48,7 @@
         /* 介绍面板 - 卷轴风 */
         .intro-panel {
             position: fixed; left: 38px; top: 50%; transform: translateY(-50%);
-            z-index: 30; width: 290px;
+            z-index: 100; width: 290px;
             background: linear-gradient(135deg, rgba(18,20,28,0.94) 0%, rgba(10,12,20,0.97) 100%);
             backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
             border: 1px solid rgba(210,170,100,0.32);
@@ -448,14 +448,14 @@
         // ═══════════════════════════════════════════════════
         //  灯光系统（宴会暖光 + 多盏灯源）
         // ═══════════════════════════════════════════════════
-        const ambientLight = new THREE.AmbientLight(0x4a4e5a, 0.6);
+        const ambientLight = new THREE.AmbientLight(0x6a6e7a, 0.9);
         scene.add(ambientLight);
 
-        const hemiLight = new THREE.HemisphereLight(0x6a7088, 0x2a1810, 0.6);
+        const hemiLight = new THREE.HemisphereLight(0x8a90a8, 0x3a2810, 0.9);
         scene.add(hemiLight);
 
         // 主光（暖金色，宴会顶光）
-        const mainLight = new THREE.SpotLight(0xffdca0, 8.0, 50, Math.PI / 4, 0.3, 0.9);
+        const mainLight = new THREE.SpotLight(0xffdca0, 12.0, 50, Math.PI / 4, 0.3, 0.9);
         mainLight.position.set(0, 16, 8);
         mainLight.target.position.set(0, 1.8, 0);
         mainLight.castShadow = true;
