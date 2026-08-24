@@ -452,10 +452,10 @@
         // ═══════════════════════════════════════════════════
         //  灯光系统（宴会暖光 + 多盏灯源）
         // ═══════════════════════════════════════════════════
-        const ambientLight = new THREE.AmbientLight(0x6a6e7a, 0.9);
+        const ambientLight = new THREE.AmbientLight(0x8a7a6a, 0.9);
         scene.add(ambientLight);
 
-        const hemiLight = new THREE.HemisphereLight(0x8a90a8, 0x3a2810, 0.9);
+        const hemiLight = new THREE.HemisphereLight(0x9a8a7a, 0x3a2810, 0.9);
         scene.add(hemiLight);
 
         // 主光（暖金色，宴会顶光）
@@ -2372,6 +2372,16 @@
                 panel.style.transform = '';
                 panel.style.zIndex = '';
             });
+            
+            // 强制设置介绍面板的位置，确保它在视口内可见
+            const introPanel = document.getElementById('introPanel');
+            if (introPanel) {
+                introPanel.style.position = 'fixed';
+                introPanel.style.left = '38px';
+                introPanel.style.top = '80px';
+                introPanel.style.transform = 'none';
+                introPanel.style.zIndex = '100';
+            }
             
             function makeDraggable(panel) {
                 let isDragging = false, startX, startY, initLeft, initTop;
