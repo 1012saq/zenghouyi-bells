@@ -2195,6 +2195,14 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta(), elapsed = clock.getElapsedTime();
             controls.update(); updateIntroPanel();
+            
+            // 编钟标签特写时才显示
+            const cameraDistance = camera.position.distanceTo(controls.target);
+            const showLabels = cameraDistance < 10;
+            bellMeshes.forEach(bell => {
+                const label = bell.children.find(c => c instanceof CSS2DObject);
+                if (label) label.visible = showLabels;
+            });
             bellMeshes.forEach((bell, i) => { const offset = i * 0.11; bell.position.y += Math.sin(elapsed * 0.35 + offset) * 0.0007; });
             curtains.forEach((curtain) => {
                 const geo = curtain.geometry, pos = geo.attributes.position;
