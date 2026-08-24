@@ -2561,7 +2561,9 @@
                 
                 // 整个面板都可以拖动
                 panel.addEventListener('mousedown', (e) => {
-                    if (e.target.tagName === 'BUTTON' && e.target !== minBtn) return;
+                    // 如果点击的是minBtn，不触发拖拽
+                    if (e.target === minBtn) return;
+                    if (e.target.tagName === 'BUTTON') return;
                     if (e.target.classList.contains('song-btn') || e.target.classList.contains('play-btn')) return;
                     isDragging = true;
                     hasMoved = false;
@@ -2591,10 +2593,13 @@
                 
                 // minBtn点击切换缩略/展开状态
                 if (minBtn) {
+                    minBtn.addEventListener('mousedown', (e) => {
+                        e.stopPropagation();
+                        hasMoved = false;
+                    });
                     minBtn.addEventListener('click', (e) => {
                         e.stopPropagation();
-                        // 如果刚刚拖动过，不切换缩略状态
-                        if (hasMoved) { hasMoved = false; return; }
+                        e.preventDefault();
                         panel.classList.toggle('panel-minimized');
                         minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
                     });
@@ -2603,14 +2608,6 @@
             
             document.querySelectorAll('.draggable-panel').forEach(panel => {
                 makeDraggable(panel);
-                const minBtn = panel.querySelector('.minimize-btn');
-                if (minBtn) {
-                    minBtn.addEventListener('click', (e) => {
-                        e.stopPropagation();
-                        panel.classList.toggle('panel-minimized');
-                        minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
-                    });
-                }
             });
             
             console.log('UI面板可拖动和缩略功能已初始化');
