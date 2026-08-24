@@ -354,6 +354,31 @@
             margin: 0 auto;
         }
 
+    
+        /* UI面板可拖动 */
+        .draggable-panel { cursor: move; }
+        .draggable-panel:active { cursor: grabbing; }
+        /* 缩略状态 */
+        .panel-minimized {
+            width: 50px !important;
+            min-width: 50px !important;
+            height: 50px !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            display: flex !important;
+            align-items: center;
+            justify-content: center;
+        }
+        .panel-minimized > *:not(.minimize-btn) { display: none !important; }
+        .panel-minimized .minimize-btn {
+            position: relative !important;
+            top: auto !important;
+            right: auto !important;
+            width: 36px !important;
+            height: 36px !important;
+            font-size: 18px !important;
+        }
+
     </style>
 </head>
 <body>
@@ -364,7 +389,7 @@
     </div>
     <div id="canvas-container"></div>
 
-    <div class="header">
+    <div class="header draggable-panel" id="headerPanel" data-panel="header">
         <h1>曾侯乙编钟</h1>
         <div class="sub">宫廷雅乐 · 湖北省博物馆藏 · 战国早期</div>
         <div class="seal">镇馆之宝 · 禁止出国展览</div>
@@ -373,7 +398,7 @@
     <div class="side-decoration">楚风汉韵 金石和鸣</div>
     <div class="side-decoration-left">钟鸣鼎食 礼乐之邦</div>
 
-    <div class="intro-panel" id="introPanel">
+    <div class="intro-panel draggable-panel" id="introPanel" data-panel="intro">
         <div class="panel-header">
             <div class="title">曾侯乙编钟</div>
             <div class="title-en">ZENGHOUYI CHIME BELLS</div>
@@ -387,8 +412,8 @@
         <div class="panel-footer">湖北省博物馆藏</div>
     </div>
 
-    <div class="info-panel" id="infoPanel">
-        <button class="panel-toggle-btn" id="infoToggleBtn">−</button>
+    <div class="info-panel draggable-panel" id="infoPanel" data-panel="info">
+        <button class="panel-toggle-btn minimize-btn" id="infoToggleBtn">−</button>
         <div class="info-content">
         <div class="name" id="bellName">🎵 点击编钟演奏</div>
         <div class="detail" id="bellDetail">曾侯乙墓出土 · 全套65件</div>
@@ -397,7 +422,7 @@
         </div>
     </div>
 
-    <div class="player-panel" id="playerPanel">
+    <div class="player-panel draggable-panel" id="playerPanel" data-panel="player">
         <div class="song-selector-wrapper">
             <button class="song-toggle-btn" id="songToggleBtn">🎵 曲目 ▾</button>
             <div class="song-selector" id="songSelector">
@@ -414,7 +439,7 @@
         <span class="progress-text" id="progressText">0/14</span>
     </div>
 
-    <div class="view-presets" id="viewPresets">
+    <div class="view-presets draggable-panel" id="viewPresets" data-panel="view">
         <button class="preset-btn" data-view="front">正面</button>
         <button class="preset-btn" data-view="side">侧面</button>
         <button class="preset-btn" data-view="close">特写</button>
@@ -1865,144 +1890,6 @@
         scene.add(bellGroup);
         scene.add(createRack());
 
-        // 宫殿柱子（庄重辉煌）
-        const pillarMat = new THREE.MeshStandardMaterial({ color: 0x6a1a10, roughness: 0.5, metalness: 0.15 });
-        const pillarGoldMat = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.35, metalness: 0.6 });
-        const pillarBaseMat = new THREE.MeshStandardMaterial({ color: 0x5a5048, roughness: 0.7, metalness: 0.1 });
-        const beamMat = new THREE.MeshStandardMaterial({ color: 0x3a1a0a, roughness: 0.55, metalness: 0.15 });
-        const pillarPositions = [[-7.5,0,-4.5],[-7.5,0,0],[-7.5,0,4.5],[7.5,0,-4.5],[7.5,0,0],[7.5,0,4.5]];
-        pillarPositions.forEach(([x,y,z]) => {
-            // 柱身
-            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.28, 0.32, 5.8, 16), pillarMat);
-            pillar.position.set(x, 2.9, z);
-            pillar.castShadow = true;
-            pillar.receiveShadow = true;
-            scene.add(pillar);
-            // 金色柱箍
-            for (let gy = 1.5; gy <= 4.5; gy += 1.5) {
-                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.30, 0.025, 8, 16), pillarGoldMat);
-                ring.position.set(x, gy, z);
-                ring.rotation.x = Math.PI / 2;
-                scene.add(ring);
-            }
-            // 柱基
-            const base = new THREE.Mesh(new THREE.CylinderGeometry(0.45, 0.5, 0.35, 16), pillarBaseMat);
-            base.position.set(x, 0.175, z);
-            base.castShadow = true;
-            base.receiveShadow = true;
-            scene.add(base);
-            // 柱基金色装饰
-            const baseRing = new THREE.Mesh(new THREE.TorusGeometry(0.46, 0.03, 8, 16), pillarGoldMat);
-            baseRing.position.set(x, 0.35, z);
-            baseRing.rotation.x = Math.PI / 2;
-            scene.add(baseRing);
-            // 柱头（斗拱）
-            const capital = new THREE.Mesh(new THREE.BoxGeometry(0.8, 0.25, 0.8), beamMat);
-            capital.position.set(x, 5.9, z);
-            capital.castShadow = true;
-            scene.add(capital);
-            const capitalGold = new THREE.Mesh(new THREE.BoxGeometry(0.85, 0.05, 0.85), pillarGoldMat);
-            capitalGold.position.set(x, 6.05, z);
-            scene.add(capitalGold);
-        });
-
-        // 宫殿横梁（金色装饰）
-        for (let z = -4.5; z <= 4.5; z += 4.5) {
-            const beam = new THREE.Mesh(new THREE.BoxGeometry(17, 0.3, 0.4), beamMat);
-            beam.position.set(0, 5.85, z);
-            beam.castShadow = true;
-            scene.add(beam);
-            // 金色横梁装饰线
-            const beamGold = new THREE.Mesh(new THREE.BoxGeometry(17, 0.06, 0.42), pillarGoldMat);
-            beamGold.position.set(0, 6.02, z);
-            scene.add(beamGold);
-        }
-        // 纵向次梁
-        for (let x = -6; x <= 6; x += 3) {
-            const beam2 = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.2, 10), beamMat);
-            beam2.position.set(x, 5.7, 0);
-            beam2.castShadow = true;
-            scene.add(beam2);
-        }
-
-        // 天花板藻井（中心装饰）
-        const caissonGroup = new THREE.Group();
-        // 外圈金色
-        const caissonOuter = new THREE.Mesh(new THREE.TorusGeometry(1.8, 0.12, 8, 32), pillarGoldMat);
-        caissonOuter.rotation.x = Math.PI / 2;
-        caissonGroup.add(caissonOuter);
-        // 内圈深色
-        const caissonInner = new THREE.Mesh(new THREE.TorusGeometry(1.2, 0.08, 8, 32), beamMat);
-        caissonInner.rotation.x = Math.PI / 2;
-        caissonGroup.add(caissonInner);
-        // 中心金色圆顶
-        const caissonCenter = new THREE.Mesh(new THREE.CylinderGeometry(0.8, 0.8, 0.12, 32), pillarGoldMat);
-        caissonGroup.add(caissonCenter);
-        // 中心莲花纹
-        for (let i = 0; i < 8; i++) {
-            const petal = new THREE.Mesh(new THREE.SphereGeometry(0.18, 8, 8), beamMat);
-            const angle = (i / 8) * Math.PI * 2;
-            petal.position.set(Math.cos(angle) * 0.5, 0.1, Math.sin(angle) * 0.5);
-            petal.scale.set(1, 0.25, 0.7);
-            petal.rotation.y = -angle;
-            caissonGroup.add(petal);
-        }
-        caissonGroup.position.set(0, 5.65, 0);
-        scene.add(caissonGroup);
-
-        // 宫殿地板（金砖效果）
-        const floorCanvas = document.createElement('canvas');
-        floorCanvas.width = 256; floorCanvas.height = 256;
-        const floorCtx = floorCanvas.getContext('2d');
-        floorCtx.fillStyle = '#2a2218';
-        floorCtx.fillRect(0, 0, 256, 256);
-        for (let y = 0; y < 256; y += 32) {
-            for (let x = 0; x < 256; x += 32) {
-                const brightness = 0.85 + Math.random() * 0.25;
-                floorCtx.fillStyle = `rgb(${Math.floor(42*brightness)},${Math.floor(34*brightness)},${Math.floor(24*brightness)})`;
-                floorCtx.fillRect(x+1, y+1, 30, 30);
-            }
-        }
-        floorCtx.strokeStyle = 'rgba(10,8,5,0.6)';
-        floorCtx.lineWidth = 2;
-        for (let i = 0; i <= 256; i += 32) {
-            floorCtx.beginPath(); floorCtx.moveTo(i, 0); floorCtx.lineTo(i, 256); floorCtx.stroke();
-            floorCtx.beginPath(); floorCtx.moveTo(0, i); floorCtx.lineTo(256, i); floorCtx.stroke();
-        }
-        const floorTexture = new THREE.CanvasTexture(floorCanvas);
-        floorTexture.wrapS = THREE.RepeatWrapping;
-        floorTexture.wrapT = THREE.RepeatWrapping;
-        floorTexture.repeat.set(5, 5);
-        const palaceFloor = new THREE.Mesh(
-            new THREE.PlaneGeometry(22, 22),
-            new THREE.MeshStandardMaterial({ map: floorTexture, roughness: 0.55, metalness: 0.15 })
-        );
-        palaceFloor.rotation.x = -Math.PI / 2;
-        palaceFloor.position.y = -0.02;
-        palaceFloor.receiveShadow = true;
-        scene.add(palaceFloor);
-
-        // 编钟台基（两层台阶）
-        const platformMat = new THREE.MeshStandardMaterial({ color: 0x3a3028, roughness: 0.6, metalness: 0.1 });
-        const step1 = new THREE.Mesh(new THREE.BoxGeometry(11, 0.22, 6.5), platformMat);
-        step1.position.set(0, 0.11, 0);
-        step1.receiveShadow = true;
-        step1.castShadow = true;
-        scene.add(step1);
-        const step2 = new THREE.Mesh(new THREE.BoxGeometry(9.5, 0.22, 5.5), platformMat);
-        step2.position.set(0, 0.33, 0);
-        step2.receiveShadow = true;
-        step2.castShadow = true;
-        scene.add(step2);
-        // 台阶金色边缘
-        const stepEdge1 = new THREE.Mesh(new THREE.BoxGeometry(11.1, 0.05, 6.6), pillarGoldMat);
-        stepEdge1.position.set(0, 0.24, 0);
-        scene.add(stepEdge1);
-        const stepEdge2 = new THREE.Mesh(new THREE.BoxGeometry(9.6, 0.05, 5.6), pillarGoldMat);
-        stepEdge2.position.set(0, 0.46, 0);
-        scene.add(stepEdge2);
-
-
         bellMeshes.forEach((bell) => {
             const data = bell.userData.bellData;
             const div = document.createElement('div');
@@ -2370,6 +2257,45 @@
         introToggleBtn.addEventListener('click', () => {
             document.getElementById('introPanel').classList.toggle('collapsed');
             introToggleBtn.textContent = document.getElementById('introPanel').classList.contains('collapsed') ? '+' : '−';
+        });
+
+        // UI面板可拖动和缩略
+        function makeDraggable(panel) {
+            let isDragging = false, startX, startY, initLeft, initTop;
+            const handle = panel.querySelector('.minimize-btn') || panel;
+            handle.addEventListener('mousedown', (e) => {
+                if (e.target.tagName === 'BUTTON' && !e.target.classList.contains('minimize-btn')) return;
+                if (e.target.classList.contains('song-btn')) return;
+                isDragging = true;
+                startX = e.clientX; startY = e.clientY;
+                const rect = panel.getBoundingClientRect();
+                initLeft = rect.left; initTop = rect.top;
+                panel.style.position = 'fixed';
+                panel.style.left = initLeft + 'px';
+                panel.style.top = initTop + 'px';
+                panel.style.right = 'auto';
+                panel.style.bottom = 'auto';
+                panel.style.transform = 'none';
+                panel.style.zIndex = '1000';
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', (e) => {
+                if (!isDragging) return;
+                panel.style.left = (initLeft + e.clientX - startX) + 'px';
+                panel.style.top = (initTop + e.clientY - startY) + 'px';
+            });
+            document.addEventListener('mouseup', () => { isDragging = false; });
+        }
+        document.querySelectorAll('.draggable-panel').forEach(panel => {
+            makeDraggable(panel);
+            const minBtn = panel.querySelector('.minimize-btn');
+            if (minBtn) {
+                minBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    panel.classList.toggle('panel-minimized');
+                    minBtn.textContent = panel.classList.contains('panel-minimized') ? '+' : '−';
+                });
+            }
         });
 
         playBtn.addEventListener('click', togglePlay);
