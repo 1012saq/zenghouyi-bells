@@ -291,13 +291,13 @@
             position: absolute;
             top: 6px;
             right: 6px;
-            width: 24px;
-            height: 24px;
+            width: 28px;
+            height: 28px;
             border-radius: 50%;
             border: 2px solid #d4b48c;
             background: linear-gradient(135deg, #3a2a1a, #2a1a0a);
             color: #d4b48c;
-            font-size: 14px;
+            font-size: 16px;
             font-weight: bold;
             cursor: pointer;
             display: flex;
@@ -305,8 +305,13 @@
             justify-content: center;
             z-index: 100;
             line-height: 1;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.5);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(212,180,140,0.3);
             transition: all 0.2s;
+            animation: pulse 2s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 12px rgba(212,180,140,0.3); }
+            50% { box-shadow: 0 2px 8px rgba(0,0,0,0.5), 0 0 20px rgba(212,180,140,0.6); }
         }
         .minimize-btn:hover {
             background: linear-gradient(135deg, #d4b48c, #b8956a);
@@ -378,7 +383,7 @@
         <span class="progress-text" id="progressText">0/14</span>
     </div>
 
-    <div class="controls-hint" id="controlsHint">✦ 自由拖拽 · 点击编钟 · 聆听宫廷雅乐 ✦</div>
+    <div class="controls-hint" id="controlsHint">✦ 自由拖拽 · 点击编钟 · 面板右上角按钮可缩略/拖动 ✦</div>
 
     <script type="importmap">
     {
@@ -407,8 +412,8 @@
 
         // ─── 场景 ───
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x2a2d38);
-        scene.fog = new THREE.FogExp2(0x2a2d38, 0.018);
+        scene.background = new THREE.Color(0x1a0f0a);
+        scene.fog = new THREE.FogExp2(0x1a0f0a, 0.015);
 
         const camera = new THREE.PerspectiveCamera(34, window.innerWidth / window.innerHeight, 0.1, 150);
         camera.position.set(13, 7, 16);
@@ -1819,6 +1824,41 @@
         scene.add(bellGroup);
         scene.add(createRack());
 
+        // 宫殿背景墙（庄重辉煌）
+        const palaceWallMat = new THREE.MeshStandardMaterial({ color: 0x2a1008, roughness: 0.8, metalness: 0.1 });
+        const palaceWall = new THREE.Mesh(new THREE.PlaneGeometry(24, 10), palaceWallMat);
+        palaceWall.position.set(0, 5, -10);
+        palaceWall.receiveShadow = true;
+        scene.add(palaceWall);
+        // 背景墙金色装饰线
+        const goldLineMat = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.4, metalness: 0.7 });
+        const goldLineTop = new THREE.Mesh(new THREE.BoxGeometry(24.5, 0.15, 0.1), goldLineMat);
+        goldLineTop.position.set(0, 10, -9.9);
+        scene.add(goldLineTop);
+        const goldLineBottom = new THREE.Mesh(new THREE.BoxGeometry(24.5, 0.15, 0.1), goldLineMat);
+        goldLineBottom.position.set(0, 0, -9.9);
+        scene.add(goldLineBottom);
+        // 宫殿柱子（2根，红色+金色装饰）
+        const pillarRedMat = new THREE.MeshStandardMaterial({ color: 0x6a1a10, roughness: 0.5, metalness: 0.2 });
+        const pillarGoldMat = new THREE.MeshStandardMaterial({ color: 0xc8a050, roughness: 0.35, metalness: 0.7 });
+        [[-10, -8], [10, -8]].forEach(([x, z]) => {
+            const pillar = new THREE.Mesh(new THREE.CylinderGeometry(0.4, 0.45, 10, 12), pillarRedMat);
+            pillar.position.set(x, 5, z);
+            pillar.castShadow = true;
+            scene.add(pillar);
+            // 金色柱箍
+            for (let gy = 2; gy <= 8; gy += 3) {
+                const ring = new THREE.Mesh(new THREE.TorusGeometry(0.42, 0.03, 6, 12), pillarGoldMat);
+                ring.position.set(x, gy, z);
+                ring.rotation.x = Math.PI / 2;
+                scene.add(ring);
+            }
+            // 柱头
+            const capital = new THREE.Mesh(new THREE.BoxGeometry(1, 0.3, 1), pillarGoldMat);
+            capital.position.set(x, 10.15, z);
+            scene.add(capital);
+        });
+
         bellMeshes.forEach((bell) => {
             const data = bell.userData.bellData;
             const div = document.createElement('div');
@@ -2200,6 +2240,7 @@
             requestAnimationFrame(animate);
             const delta = clock.getDelta(), elapsed = clock.getElapsedTime();
             controls.update(); updateIntroPanel();
+            if (typeof updateIntroAnimation === 'function') updateIntroAnimation();
             if (typeof updateLabelsVisibility === 'function') updateLabelsVisibility();
             bellMeshes.forEach((bell, i) => { const offset = i * 0.11; bell.position.y += Math.sin(elapsed * 0.35 + offset) * 0.0007; });
             curtains.forEach((curtain) => {
@@ -2270,6 +2311,33 @@
         setTimeout(() => { loading.classList.add('hidden'); setTimeout(() => { loading.style.display = 'none'; }, 1300); }, 1200);
         document.addEventListener('click', initAudio, { once: true });
         document.addEventListener('touchstart', initAudio, { once: true });
+        
+        // 进场动画：相机从远处慢慢拉近
+        const introStartPos = new THREE.Vector3(20, 10, 22);
+        const introEndPos = new THREE.Vector3(13, 7, 16);
+        const introStartTarget = new THREE.Vector3(0, 3, 0);
+        const introEndTarget = new THREE.Vector3(0, 2, 0);
+        let introProgress = 0;
+        let introActive = true;
+        camera.position.copy(introStartPos);
+        controls.target.copy(introStartTarget);
+        
+        function easeInOutCubic(t) {
+            return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+        }
+        
+        function updateIntroAnimation() {
+            if (!introActive) return;
+            introProgress += 0.005;
+            if (introProgress >= 1) {
+                introProgress = 1;
+                introActive = false;
+            }
+            const t = easeInOutCubic(introProgress);
+            camera.position.lerpVectors(introStartPos, introEndPos, t);
+            controls.target.lerpVectors(introStartTarget, introEndTarget, t);
+        }
+        
         animate();
         
         // 编钟标签特写时才显示
